@@ -1,0 +1,18 @@
+[
+  {
+    "id": "OFF-401",
+    "name": "Inspector Vikram Sharma",
+    "badgeNo": "INS-PB-8891",
+    "centreAssigned": "Ludhiana Mandi Centre 4",
+    "shift": "Morning (08:00 AM - 04:00 PM)",
+    "status": "Active"
+  },
+  {
+    "id": "OFF-402",
+    "name": "Inspector Priya Verma",
+    "badgeNo": "INS-PB-8892",
+    "centreAssigned": "Patiala Grain Mandi",
+    "shift": "Evening (04:00 PM - 12:00 AM)",
+    "status": "Active"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "reportId": "RPT-2026-08",
+    "title": "Daily Procurement Summary - Ludhiana District",
+    "dateGenerated": "2026-08-29",
+    "totalProcuredTons": 4520,
+    "activeCentres": 14,
+    "farmersServed": 320,
+    "dbtAmountDisbursed": 103960000
+  },
+  {
+    "reportId": "RPT-2026-07",
+    "title": "Weekly Quality & Moisture Audit Report",
+    "dateGenerated": "2026-08-25",
+    "totalProcuredTons": 28900,
+    "activeCentres": 45,
+    "farmersServed": 2100,
+    "dbtAmountDisbursed": 664700000
+  }
+]

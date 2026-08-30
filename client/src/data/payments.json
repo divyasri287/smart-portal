@@ -1,0 +1,22 @@
+[
+  {
+    "paymentId": "PAY-882109",
+    "farmerName": "Ramesh Singh",
+    "quantityQuintals": 140,
+    "mspPerQuintal": 2300,
+    "totalAmount": 322000,
+    "bankRefNo": "DBT-2026-990123",
+    "disbursementDate": "2026-08-28",
+    "status": "DBT Credited"
+  },
+  {
+    "paymentId": "PAY-882110",
+    "farmerName": "Sukhwinder Kaur",
+    "quantityQuintals": 95,
+    "mspPerQuintal": 2300,
+    "totalAmount": 218500,
+    "bankRefNo": "DBT-2026-990124",
+    "disbursementDate": "2026-08-29",
+    "status": "Pending Processing"
+  }
+]

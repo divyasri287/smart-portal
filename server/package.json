@@ -1,0 +1,13 @@
+{
+  "name": "smart-procurement-backend-stub",
+  "version": "1.0.0",
+  "description": "Backend API placeholder structure for Developer 5",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["smart-india-hackathon", "procurement", "backend"],
+  "author": "SIH Team",
+  "license": "ISC"
+}

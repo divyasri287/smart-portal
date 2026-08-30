@@ -1,0 +1,29 @@
+[
+  {
+    "tokenNo": "TKN-A901",
+    "farmerName": "Ramesh Singh",
+    "vehicleNo": "PB-10-CZ-4419",
+    "commodity": "Paddy Grade A",
+    "gateEntryTime": "08:45 AM",
+    "status": "In Queue",
+    "bayAssigned": "Bay 3"
+  },
+  {
+    "tokenNo": "TKN-A902",
+    "farmerName": "Sukhwinder Kaur",
+    "vehicleNo": "PB-11-AB-1290",
+    "commodity": "Wheat",
+    "gateEntryTime": "09:15 AM",
+    "status": "Quality Verified",
+    "bayAssigned": "Bay 1"
+  },
+  {
+    "tokenNo": "TKN-A903",
+    "farmerName": "Gurpreet Sharma",
+    "vehicleNo": "HR-03-XY-9081",
+    "commodity": "Mustard",
+    "gateEntryTime": "09:40 AM",
+    "status": "Weight Logged",
+    "bayAssigned": "Bay 2"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "bookingId": "BK-2026-001",
+    "tokenId": "TKN-A901",
+    "farmerName": "Ramesh Singh",
+    "farmerId": "FRM-1001",
+    "centreName": "Ludhiana Mandi Centre 4",
+    "slotDate": "2026-09-02",
+    "timeSlot": "09:00 AM - 11:00 AM",
+    "estimatedQuantity": 150,
+    "crop": "Paddy Grade A",
+    "status": "Booked"
+  },
+  {
+    "bookingId": "BK-2026-002",
+    "tokenId": "TKN-A902",
+    "farmerName": "Sukhwinder Kaur",
+    "farmerId": "FRM-1002",
+    "centreName": "Ludhiana Mandi Centre 4",
+    "slotDate": "2026-09-02",
+    "timeSlot": "11:00 AM - 01:00 PM",
+    "estimatedQuantity": 100,
+    "crop": "Wheat",
+    "status": "In Queue"
+  }
+]
