@@ -28,7 +28,7 @@ To ensure zero merge conflicts during team collaboration on GitHub, the codebase
 ## 🛠️ Tech Stack
 
 - **Frontend Framework**: React 19 + Vite 6
-- **Routing**: React Router DOM v6
+- **Routing**: React Router DOM v6/v7
 - **Styling**: Tailwind CSS (Government UI Palette: Emerald Green, Crisp White, Slate, Saffron)
 - **Icons**: Lucide React
 - **Forms**: React Hook Form
@@ -47,8 +47,8 @@ To ensure zero merge conflicts during team collaboration on GitHub, the codebase
 
 1. **Clone repository**:
    ```bash
-   git clone https://github.com/your-org/smart-procurement-portal.git
-   cd "Smart portal"
+   git clone https://github.com/divyasri287/smart-portal.git
+   cd smart-portal
    ```
 
 2. **Install Client Dependencies**:
@@ -68,7 +68,7 @@ To ensure zero merge conflicts during team collaboration on GitHub, the codebase
 ## 📁 Repository Structure
 
 ```
-Smart portal/
+smart-portal/
 ├── client/
 │   ├── public/
 │   ├── src/
@@ -98,14 +98,3 @@ Smart portal/
 ├── docs/                  # Architecture & Git workflow specs
 └── README.md
 ```
-
----
-
-## 🎨 Design System & Accessibility Guidelines
-
-- **Color Palette**:
-  - Primary Green: `#047857` (`emerald-700`)
-  - Secondary Saffron/Orange: `#D97706` (`amber-600`)
-  - Accent Dark Navy: `#1E293B` (`slate-800`)
-  - High Contrast Background: `#F8FAFC` (`slate-50`)
-- **Typography**: High contrast, readable sans-serif typography with large action buttons for ease of access in rural agricultural centres.
