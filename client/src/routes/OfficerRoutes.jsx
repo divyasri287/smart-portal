@@ -5,11 +5,13 @@ import Queue from '../pages/officer/Queue';
 import ScanQR from '../pages/officer/ScanQR';
 import SearchFarmer from '../pages/officer/SearchFarmer';
 import FarmerDetails from '../pages/officer/FarmerDetails';
+import VerifyFarmer from '../pages/officer/VerifyFarmer';
 import WeightCheck from '../pages/officer/WeightCheck';
 import QualityCheck from '../pages/officer/QualityCheck';
 import SubmitProcurement from '../pages/officer/SubmitProcurement';
 import Receipt from '../pages/officer/Receipt';
 import OfficerHistory from '../pages/officer/History';
+import OfficerProfile from '../pages/officer/Profile';
 
 export const OfficerRoutes = () => {
   return (
@@ -20,11 +22,13 @@ export const OfficerRoutes = () => {
       <Route path="scan-qr" element={<ScanQR />} />
       <Route path="search-farmer" element={<SearchFarmer />} />
       <Route path="farmer-details/:id" element={<FarmerDetails />} />
-      <Route path="weight-check" element={<WeightCheck />} />
+      <Route path="verify-farmer/:id" element={<VerifyFarmer />} />
       <Route path="quality-check" element={<QualityCheck />} />
+      <Route path="weight-check" element={<WeightCheck />} />
       <Route path="submit-procurement" element={<SubmitProcurement />} />
       <Route path="receipt/:id" element={<Receipt />} />
       <Route path="history" element={<OfficerHistory />} />
+      <Route path="profile" element={<OfficerProfile />} />
     </Routes>
   );
 };

@@ -1,51 +1,163 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
-import Card from '../../components/cards/Card';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
-import { Printer, Download } from 'lucide-react';
+import { Printer, Download, Home, CheckCircle2, IndianRupee, Building } from 'lucide-react';
+import receiptsData from '../../data/receipts.json';
 
 export const Receipt = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const receipt = receiptsData.find((r) => r.receiptId === id) || receiptsData[0];
+
+  const ReceiptRow = ({ label, value, mono = false }) => (
+    <div className="flex items-start justify-between py-2 border-b border-dashed border-slate-200 last:border-0 gap-4">
+      <span className="text-xs text-slate-500 shrink-0">{label}</span>
+      <span className={`text-xs font-semibold text-slate-800 text-right ${mono ? 'font-mono' : ''}`}>{value}</span>
+    </div>
+  );
+
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      <PageHeader title="Digital Procurement Receipt" subtitle="Official receipt for MSP grain handover" />
+      <PageHeader
+        title="Digital Procurement Receipt"
+        subtitle="Official MSP grain procurement voucher"
+        action={
+          <SecondaryButton icon={Home} onClick={() => navigate('/officer/dashboard')}>
+            Dashboard
+          </SecondaryButton>
+        }
+      />
 
-      <Card className="border-2 border-emerald-700">
-        <div className="text-center pb-4 border-b border-slate-200">
-          <span className="text-xs font-bold uppercase tracking-widest text-emerald-800">Govt of India - Food Corporation Voucher</span>
-          <h2 className="text-xl font-mono font-bold text-slate-900 mt-1">{id || 'RCP-2026-901'}</h2>
-          <p className="text-xs text-slate-500">Date: 2026-08-30 | Ludhiana Mandi Centre 4</p>
+      {/* Success Banner */}
+      <div className="flex items-center gap-3 bg-green-800 text-white rounded-xl px-5 py-4">
+        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+          <CheckCircle2 className="w-5 h-5" />
+        </div>
+        <div>
+          <p className="font-bold text-sm">Procurement Successfully Recorded!</p>
+          <p className="text-xs text-green-200 mt-0.5">Payment will be credited via DBT within 48 working hours</p>
+        </div>
+      </div>
+
+      {/* Receipt Card */}
+      <div id="receipt-print" className="bg-white border-2 border-green-800 rounded-2xl overflow-hidden shadow-lg">
+        {/* Receipt Header */}
+        <div className="bg-green-800 text-white px-6 py-5 text-center">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Building className="w-5 h-5 text-green-300" />
+            <span className="text-xs font-bold uppercase tracking-widest text-green-200">
+              Government of India · Food Corporation Voucher
+            </span>
+          </div>
+          <h2 className="text-2xl font-bold font-mono tracking-wide">{id || 'RCP-2026-901'}</h2>
+          <p className="text-sm text-green-300 mt-1">MSP Grain Procurement Receipt — Season Kharif 2026</p>
         </div>
 
-        <div className="py-4 space-y-2 text-xs text-slate-800">
-          <div className="flex justify-between"><span>Farmer Name:</span><span className="font-semibold">Ramesh Singh</span></div>
-          <div className="flex justify-between"><span>Farmer Aadhaar:</span><span className="font-mono">XXXX-XXXX-8912</span></div>
-          <div className="flex justify-between"><span>Crop Type:</span><span className="font-semibold">Paddy Grade A</span></div>
-          <div className="flex justify-between"><span>Net Quantity:</span><span className="font-bold">140 Quintals</span></div>
-          <div className="flex justify-between"><span>MSP Rate:</span><span>₹ 2,300 / Qtl</span></div>
-          <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-bold text-emerald-800">
-            <span>Total Payable Amount:</span>
-            <span>₹ 3,22,000</span>
+        {/* Centre & Date strip */}
+        <div className="bg-green-50 border-b border-green-200 px-6 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+          <span className="text-xs text-green-800 font-semibold">{receipt.centre}</span>
+          <span className="text-xs text-green-600 font-mono">{receipt.date}</span>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-6">
+          {/* Farmer Details */}
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Farmer Details</p>
+            <div className="space-y-0">
+              <ReceiptRow label="Farmer Name" value={receipt.farmerName} />
+              <ReceiptRow label="Farmer ID" value={receipt.farmerId} mono />
+              <ReceiptRow label="Aadhaar (Masked)" value={receipt.aadhaarMasked} mono />
+              <ReceiptRow label="Mobile" value={receipt.mobile} />
+              <ReceiptRow label="District" value={`${receipt.district}, ${receipt.state}`} />
+              <ReceiptRow label="Bank Account" value={receipt.bankAccount} mono />
+            </div>
+          </div>
+
+          {/* Commodity & Quality */}
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Commodity & Quality</p>
+            <div className="space-y-0">
+              <ReceiptRow label="Commodity" value={receipt.commodity} />
+              <ReceiptRow label="Vehicle No." value={receipt.vehicleNo} mono />
+              <ReceiptRow label="Quality Grade" value={receipt.gradeResult} />
+              <ReceiptRow label="Moisture" value={`${receipt.moisturePct}%`} mono />
+              <ReceiptRow label="Foreign Matter" value={`${receipt.foreignMatterPct}%`} mono />
+            </div>
+          </div>
+
+          {/* Weight */}
+          <div>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Weighment Details</p>
+            <div className="space-y-0">
+              <ReceiptRow label="Gross Weight" value={`${receipt.grossWeightKg?.toLocaleString('en-IN')} kg`} mono />
+              <ReceiptRow label="Tare Weight" value={`${receipt.tareWeightKg?.toLocaleString('en-IN')} kg`} mono />
+              <ReceiptRow label="Net Weight" value={`${receipt.netWeightKg?.toLocaleString('en-IN')} kg`} mono />
+              <ReceiptRow label="Net Quantity" value={`${receipt.netWeightQtl} Quintals`} mono />
+            </div>
+          </div>
+
+          {/* Payment */}
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">MSP Payment Calculation</p>
+            <div className="space-y-1.5">
+              <div className="flex justify-between text-xs text-slate-600">
+                <span>Quantity</span>
+                <span className="font-mono">{receipt.netWeightQtl} Qtl</span>
+              </div>
+              <div className="flex justify-between text-xs text-slate-600">
+                <span>MSP Rate</span>
+                <span className="font-mono">₹ {receipt.mspRate?.toLocaleString('en-IN')}/Qtl</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-green-300 mt-2">
+                <span className="font-bold text-green-900 text-sm">Total Payable</span>
+                <span className="font-bold text-green-900 text-lg font-mono">₹ {receipt.totalAmount?.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* DBT Info */}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 text-center">
+            Direct Payment transferred via Aadhaar DBT within 48 hours to registered bank account.
+          </div>
+
+          {/* Officer Signature */}
+          <div className="flex items-center justify-between border-t border-dashed border-slate-200 pt-4">
+            <div className="text-xs text-slate-500">
+              <p className="font-semibold text-slate-700">{receipt.officerName}</p>
+              <p>Badge: {receipt.officerBadge}</p>
+              <p>Procurement Officer</p>
+            </div>
+            <div className="text-right text-xs text-slate-500">
+              <p className="text-xs font-mono text-slate-400">Digital Signature</p>
+              <div className="w-24 h-8 border border-dashed border-slate-300 rounded mt-1 flex items-center justify-center text-[10px] text-slate-300">e-Sign</div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div className="bg-slate-50 p-3 rounded-md border border-slate-200 text-[11px] text-slate-600 text-center mb-4">
-          Direct Payment will be transferred via Aadhaar DBT within 48 hours to registered SBI account.
-        </div>
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <PrimaryButton icon={Printer} onClick={() => window.print()} className="flex-1 justify-center">
+          Print Voucher
+        </PrimaryButton>
+        <SecondaryButton icon={Download} onClick={() => alert('Voucher PDF downloaded')} className="flex-1 justify-center">
+          Download PDF
+        </SecondaryButton>
+        <SecondaryButton onClick={() => navigate('/officer/history')} className="flex-1 justify-center">
+          View History
+        </SecondaryButton>
+      </div>
 
-        <div className="flex gap-2">
-          <PrimaryButton icon={Printer} onClick={() => window.print()} className="flex-1">
-            Print Voucher
-          </PrimaryButton>
-          <SecondaryButton icon={Download} onClick={() => alert('Voucher PDF downloaded')}>
-            Download PDF
-          </SecondaryButton>
-        </div>
-      </Card>
+      <button
+        onClick={() => navigate('/officer/dashboard')}
+        className="w-full text-center text-sm text-green-700 hover:text-green-900 font-semibold py-2 transition-colors"
+      >
+        ← Return to Dashboard
+      </button>
     </div>
   );
 };

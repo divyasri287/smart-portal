@@ -1,29 +1,98 @@
 [
   {
+    "id": "FRM-1001",
     "tokenNo": "TKN-A901",
     "farmerName": "Ramesh Singh",
     "vehicleNo": "PB-10-CZ-4419",
     "commodity": "Paddy Grade A",
     "gateEntryTime": "08:45 AM",
     "status": "In Queue",
-    "bayAssigned": "Bay 3"
+    "bayAssigned": "Bay 3",
+    "acreage": 12.5,
+    "district": "Ludhiana"
   },
   {
+    "id": "FRM-1002",
     "tokenNo": "TKN-A902",
     "farmerName": "Sukhwinder Kaur",
     "vehicleNo": "PB-11-AB-1290",
     "commodity": "Wheat",
     "gateEntryTime": "09:15 AM",
     "status": "Quality Verified",
-    "bayAssigned": "Bay 1"
+    "bayAssigned": "Bay 1",
+    "acreage": 8.0,
+    "district": "Patiala"
   },
   {
+    "id": "FRM-1003",
     "tokenNo": "TKN-A903",
     "farmerName": "Gurpreet Sharma",
     "vehicleNo": "HR-03-XY-9081",
     "commodity": "Mustard",
     "gateEntryTime": "09:40 AM",
     "status": "Weight Logged",
-    "bayAssigned": "Bay 2"
+    "bayAssigned": "Bay 2",
+    "acreage": 15.0,
+    "district": "Ambala"
+  },
+  {
+    "id": "FRM-1004",
+    "tokenNo": "TKN-A904",
+    "farmerName": "Balwinder Singh",
+    "vehicleNo": "PB-65-GH-7712",
+    "commodity": "Paddy (PR-14)",
+    "gateEntryTime": "10:05 AM",
+    "status": "Pending Verification",
+    "bayAssigned": "Bay 4",
+    "acreage": 9.0,
+    "district": "Ludhiana"
+  },
+  {
+    "id": "FRM-1005",
+    "tokenNo": "TKN-A905",
+    "farmerName": "Harpreet Kour",
+    "vehicleNo": "PB-13-KL-3345",
+    "commodity": "Wheat",
+    "gateEntryTime": "10:30 AM",
+    "status": "Receipt Generated",
+    "bayAssigned": "Bay 1",
+    "acreage": 6.5,
+    "district": "Sangrur"
+  },
+  {
+    "id": "FRM-1006",
+    "tokenNo": "TKN-A906",
+    "farmerName": "Jaswant Pal",
+    "vehicleNo": "HR-55-MN-8823",
+    "commodity": "Paddy Grade A",
+    "gateEntryTime": "10:55 AM",
+    "status": "In Queue",
+    "bayAssigned": "Bay 5",
+    "acreage": 20.0,
+    "district": "Hisar"
+  },
+  {
+    "id": "FRM-1007",
+    "tokenNo": "TKN-A907",
+    "farmerName": "Manjit Kaur",
+    "vehicleNo": "PB-08-RT-6609",
+    "commodity": "Maize",
+    "gateEntryTime": "11:20 AM",
+    "status": "Quality Verified",
+    "bayAssigned": "Bay 2",
+    "acreage": 11.0,
+    "district": "Moga"
+  },
+  {
+    "id": "FRM-1008",
+    "tokenNo": "TKN-A908",
+    "farmerName": "Dilbagh Singh",
+    "vehicleNo": "PB-22-PQ-4401",
+    "commodity": "Mustard",
+    "gateEntryTime": "11:45 AM",
+    "status": "Pending Verification",
+    "bayAssigned": "Bay 3",
+    "acreage": 7.5,
+    "district": "Bathinda"
   }
 ]
