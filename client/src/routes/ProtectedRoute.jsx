@@ -6,7 +6,7 @@ export const ProtectedRoute = ({ allowedRoles = [] }) => {
   const { isAuthenticated, role } = useAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/select-role" replace />;
   }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
@@ -20,7 +20,7 @@ export const ProtectedRoute = ({ allowedRoles = [] }) => {
       case 'admin':
         return <Navigate to="/admin/dashboard" replace />;
       default:
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/select-role" replace />;
     }
   }
 
