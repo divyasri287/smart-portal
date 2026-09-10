@@ -1,264 +1,286 @@
-import React, { useState } from 'react';
-import SlotCalendar from '../../components/manager/SlotCalendar';
-import StatisticsCard from '../../components/manager/StatisticsCard';
-import { slotDates, daySlotData } from '../../data/manager/slots';
-import { 
-  Calendar, 
-  Clock, 
-  ShieldAlert, 
-  CheckCircle2, 
-  Plus, 
-  AlertOctagon,
+import React, { useState, useEffect } from 'react';
+import {
+  CalendarClock,
+  Plus,
+  Edit2,
   Lock,
-  Check
+  Unlock,
+  X,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import managerStorage from '../../utils/managerStorage';
+import { useToastContext } from '../../context/ToastContext';
 
 export const SlotManagement = () => {
-  const [selectedDayKey, setSelectedDayKey] = useState('today');
-  const [emergencyFreeze, setEmergencyFreeze] = useState(false);
-  const [showNewWindowModal, setShowNewWindowModal] = useState(false);
-  const [windowForm, setWindowForm] = useState({
-    timeRange: '08:00 PM - 10:00 PM',
-    capacity: '80'
-  });
+  const toastCtx = useToastContext();
+  const addToast = toastCtx?.addToast;
 
-  // Per-day slot data managed in state so edit / lock actions persist within the session
-  const [allDaySlots, setAllDaySlots] = useState({
-    today: [...daySlotData.today.slots],
-    tomorrow: [...daySlotData.tomorrow.slots],
-    mon: [...daySlotData.mon.slots],
-    tue: [...daySlotData.tue.slots],
-  });
+  const [slots, setSlots] = useState(() => managerStorage.getSlots());
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingSlot, setEditingSlot] = useState(null);
 
-  const currentDayMeta = daySlotData[selectedDayKey];
-  const currentSlots = allDaySlots[selectedDayKey];
+  // Form fields
+  const [timeSlot, setTimeSlot] = useState('');
+  const [maxCapacity, setMaxCapacity] = useState('40');
 
-  const handleDayChange = (key) => {
-    setSelectedDayKey(key);
+  useEffect(() => {
+    setSlots(managerStorage.getSlots());
+  }, []);
+
+  const openAddModal = () => {
+    setEditingSlot(null);
+    setTimeSlot('');
+    setMaxCapacity('40');
+    setModalOpen(true);
   };
 
-  const handleSlotUpdate = (updatedSlots) => {
-    setAllDaySlots((prev) => ({ ...prev, [selectedDayKey]: updatedSlots }));
+  const openEditModal = (slot) => {
+    setEditingSlot(slot);
+    setTimeSlot(slot.timeSlot);
+    setMaxCapacity(String(slot.maxCapacity));
+    setModalOpen(true);
   };
 
-  const handleToggleFreeze = () => {
-    setEmergencyFreeze(!emergencyFreeze);
-  };
-
-  const handleAddWindow = (e) => {
+  const handleSaveSlot = (e) => {
     e.preventDefault();
-    const newSlot = {
-      id: currentSlots.length + 1,
-      timeWindow: windowForm.timeRange,
-      booked: 0,
-      capacity: Number(windowForm.capacity),
-      status: 'Open',
-    };
-    setAllDaySlots((prev) => ({
-      ...prev,
-      [selectedDayKey]: [...prev[selectedDayKey], newSlot],
-    }));
-    setShowNewWindowModal(false);
+    if (!timeSlot.trim()) return;
+
+    const capacityNum = Number(maxCapacity) || 40;
+
+    if (editingSlot) {
+      // Update existing slot
+      const booked = editingSlot.bookedCount || 0;
+      const available = Math.max(0, capacityNum - booked);
+      const updated = managerStorage.updateSlot(editingSlot.id, {
+        timeSlot: timeSlot.trim(),
+        maxCapacity: capacityNum,
+        availableCount: available,
+      });
+      setSlots(updated);
+      if (addToast) addToast(`Slot ${timeSlot} updated successfully.`, 'success');
+    } else {
+      // Add new slot
+      const newSlot = {
+        timeSlot: timeSlot.trim(),
+        maxCapacity: capacityNum,
+        bookedCount: 0,
+        availableCount: capacityNum,
+        status: 'Open',
+      };
+      const updated = managerStorage.addSlot(newSlot);
+      setSlots(updated);
+      if (addToast) addToast(`New slot ${timeSlot} added.`, 'success');
+    }
+
+    setModalOpen(false);
+  };
+
+  const handleToggleSlot = (slot) => {
+    const updated = managerStorage.toggleSlotStatus(slot.id);
+    setSlots(updated);
+    const newStatus = slot.status === 'Open' ? 'Closed' : 'Open';
+    if (addToast) addToast(`Slot ${slot.timeSlot} is now ${newStatus}.`, newStatus === 'Open' ? 'success' : 'info');
   };
 
   return (
-    <div className="space-y-6 font-['Inter']">
-      {/* Header */}
-      <div className="bg-white p-6 rounded-[18px] border border-[#E5E7EB] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-6xl mx-auto select-none">
+      {/* ── HEADER & ADD SLOT BUTTON ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#166534] flex items-center justify-center font-bold">
-              <Calendar className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold font-['Poppins'] text-[#111827]">
-                Mandi Slot &amp; Capacity Configuration
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5 font-['Inter']">
-                Manage 2-hour hourly vehicle entry limits to prevent gate congestion and weighbridge bottlenecks
-              </p>
-            </div>
-          </div>
+          <h1 className="text-2xl font-black text-slate-900">Slot Management</h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Configure hourly capacity and manage farmer booking windows for today
+          </p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => setShowNewWindowModal(true)}
-            className="h-11 px-5 bg-[#166534] hover:bg-[#14532d] text-white font-semibold text-xs font-['Poppins'] rounded-xl shadow-xs transition-all flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Slot Window</span>
-          </button>
-
-          <button
-            onClick={handleToggleFreeze}
-            className={`h-11 px-5 font-semibold text-xs font-['Poppins'] rounded-xl transition-all flex items-center gap-2 ${
-              emergencyFreeze
-                ? 'bg-red-600 hover:bg-red-700 text-white shadow-xs'
-                : 'bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200'
-            }`}
-          >
-            <AlertOctagon className="w-4 h-4" />
-            <span>{emergencyFreeze ? 'Unfreeze All Slots' : 'Emergency Freeze'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Emergency Alert Mode Banner */}
-      {emergencyFreeze && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="p-4 rounded-[18px] bg-red-600 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md"
+        <button
+          type="button"
+          onClick={openAddModal}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-800 hover:bg-emerald-900 text-white shadow-xs transition-all cursor-pointer"
         >
-          <div className="flex items-center gap-3">
-            <Lock className="w-6 h-6 text-amber-300 animate-pulse shrink-0" />
-            <div>
-              <p className="font-['Poppins'] font-bold text-sm">
-                EMERGENCY OVERRIDE ACTIVE: All New Slot Bookings Locked
-              </p>
-              <p className="text-xs text-red-100 font-['Inter']">
-                Gate intake suspended due to extreme weather or mandi storage overflow.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleToggleFreeze}
-            className="h-9 px-4 rounded-xl bg-white text-red-700 font-bold text-xs font-['Poppins'] hover:bg-red-50 shrink-0"
-          >
-            Lift Suspension
-          </button>
-        </motion.div>
-      )}
-
-      {/* Statistics Cards — updated per selected day */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatisticsCard
-          title="Daily Mandi Quota"
-          value={`${currentDayMeta.quota} Slots`}
-          subtitle="Max Capacity Limit"
-          trend="Configured"
-          isTrendPositive={true}
-          icon={Calendar}
-          color="emerald"
-        />
-        <StatisticsCard
-          title="Booked Farmer Tokens"
-          value={`${currentDayMeta.booked} Slots`}
-          subtitle={`${Math.round((currentDayMeta.booked / currentDayMeta.quota) * 100)}% Fill Ratio`}
-          trend={selectedDayKey === 'today' ? '+12.5% vs yesterday' : 'Booking Active'}
-          isTrendPositive={true}
-          icon={Clock}
-          color="amber"
-        />
-        <StatisticsCard
-          title="Available Capacity"
-          value={`${currentDayMeta.available} Slots`}
-          subtitle="Ready for Booking"
-          trend={currentDayMeta.status}
-          isTrendPositive={true}
-          icon={CheckCircle2}
-          color="blue"
-        />
-        <StatisticsCard
-          title="Emergency Override"
-          value={emergencyFreeze ? 'Locked' : 'Normal'}
-          subtitle="Mandi Intake Status"
-          trend={emergencyFreeze ? 'Halted' : 'Operational'}
-          isTrendPositive={!emergencyFreeze}
-          icon={ShieldAlert}
-          color={emergencyFreeze ? 'red' : 'emerald'}
-        />
+          <Plus className="w-4 h-4" />
+          <span>Add Slot</span>
+        </button>
       </div>
 
-      {/* Interactive Slot Calendar Matrix */}
-      <div className="bg-white p-6 rounded-[18px] border border-[#E5E7EB] shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div>
-            <h2 className="text-base font-bold font-['Poppins'] text-[#111827]">
-              Interactive 2-Hour Time Window Allocation
-            </h2>
-            <p className="text-xs text-slate-500 font-['Inter']">
-              Click cap limit or lock toggle on any 2-hour window to adjust token intake dynamically
-            </p>
-          </div>
+      {/* ── SLOTS TABLE (EXACT 5 REQUIRED COLUMNS + ACTION BUTTONS) ── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/70">
+          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Today's Scheduled Slots ({slots.length} Slots)
+          </h2>
         </div>
 
-        {/* SlotCalendar receives selected day & slots — enables Today/Tomorrow/Mon/Tue switching */}
-        <SlotCalendar
-          selectedDayKey={selectedDayKey}
-          slotsList={currentSlots}
-          onDayChange={handleDayChange}
-          onSlotUpdate={handleSlotUpdate}
-        />
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="px-5 py-3.5">Time Slot</th>
+                <th className="px-5 py-3.5 text-center">Maximum Capacity</th>
+                <th className="px-5 py-3.5 text-center">Booked Count</th>
+                <th className="px-5 py-3.5 text-center">Available Count</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
+              {slots.map((slot) => {
+                const isOpen = slot.status === 'Open';
+                return (
+                  <tr key={slot.id} className="hover:bg-slate-50 transition-colors">
+                    {/* 1. Time Slot */}
+                    <td className="px-5 py-4 font-mono font-bold text-slate-900 text-sm">
+                      <div className="flex items-center gap-2">
+                        <CalendarClock className="w-4 h-4 text-emerald-800 shrink-0" />
+                        <span>{slot.timeSlot}</span>
+                      </div>
+                    </td>
+
+                    {/* 2. Maximum Capacity */}
+                    <td className="px-5 py-4 text-center font-mono font-bold text-slate-900">
+                      {slot.maxCapacity}
+                    </td>
+
+                    {/* 3. Booked Count */}
+                    <td className="px-5 py-4 text-center font-mono font-bold text-emerald-800">
+                      {slot.bookedCount}
+                    </td>
+
+                    {/* 4. Available Count */}
+                    <td className="px-5 py-4 text-center font-mono font-bold">
+                      <span
+                        className={`${
+                          slot.availableCount === 0 ? 'text-rose-600' : 'text-slate-700'
+                        }`}
+                      >
+                        {slot.availableCount}
+                      </span>
+                    </td>
+
+                    {/* 5. Status */}
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                          isOpen
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            isOpen ? 'bg-emerald-600' : 'bg-slate-400'
+                          }`}
+                        />
+                        {slot.status}
+                      </span>
+                    </td>
+
+                    {/* Buttons: Edit Slot / Close Slot / Reopen Slot */}
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(slot)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
+
+                        {isOpen ? (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSlot(slot)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+                          >
+                            <Lock className="w-3.5 h-3.5" />
+                            <span>Close Slot</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSlot(slot)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                          >
+                            <Unlock className="w-3.5 h-3.5" />
+                            <span>Reopen Slot</span>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Add New Time Window Modal */}
-      {showNewWindowModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-[18px] p-6 max-w-md w-full border border-[#E5E7EB] shadow-2xl space-y-4 font-['Inter']"
-          >
+      {/* ── ADD / EDIT SLOT MODAL ── */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-['Poppins'] font-bold text-base text-[#111827]">
-                Create Custom 2-Hour Slot Window
+              <h3 className="text-lg font-black text-slate-900">
+                {editingSlot ? 'Edit Booking Slot' : 'Add New Booking Slot'}
               </h3>
               <button
-                onClick={() => setShowNewWindowModal(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAddWindow} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Time Window (e.g. 08:00 PM - 10:00 PM)
+            <form onSubmit={handleSaveSlot} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase tracking-wider block">
+                  Time Slot Window <span className="text-rose-600">*</span>
                 </label>
                 <input
                   type="text"
-                  value={windowForm.timeRange}
-                  onChange={(e) => setWindowForm({ ...windowForm, timeRange: e.target.value })}
-                  className="w-full h-11 px-4 text-xs font-['Roboto_Mono'] border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534]"
+                  placeholder="e.g. 08:00 AM - 10:00 AM"
+                  value={timeSlot}
+                  onChange={(e) => setTimeSlot(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-emerald-700 focus:outline-hidden"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Max Truck Capacity Limit
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase tracking-wider block">
+                  Maximum Farmer Capacity <span className="text-rose-600">*</span>
                 </label>
                 <input
                   type="number"
-                  value={windowForm.capacity}
-                  onChange={(e) => setWindowForm({ ...windowForm, capacity: e.target.value })}
-                  className="w-full h-11 px-4 text-xs font-['Roboto_Mono'] border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534]"
+                  min="1"
+                  max="200"
+                  placeholder="e.g. 40"
+                  value={maxCapacity}
+                  onChange={(e) => setMaxCapacity(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-emerald-700 focus:outline-hidden"
                   required
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setShowNewWindowModal(false)}
-                  className="h-11 px-5 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-slate-600 hover:bg-slate-50 font-['Poppins']"
+                  onClick={() => setModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="h-11 px-5 rounded-xl bg-[#166534] hover:bg-[#14532d] text-white text-xs font-semibold font-['Poppins'] shadow-xs flex items-center gap-1.5"
+                  className="px-5 py-2.5 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-900 shadow-xs transition-colors"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>Create Window</span>
+                  {editingSlot ? 'Update Slot' : 'Create Slot'}
                 </button>
               </div>
             </form>
-          </motion.div>
+          </div>
         </div>
       )}
     </div>

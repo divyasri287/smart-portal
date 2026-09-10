@@ -1,232 +1,329 @@
-import React, { useState } from 'react';
-import OfficerPerformanceTable from '../../components/manager/OfficerPerformanceTable';
-import StatisticsCard from '../../components/manager/StatisticsCard';
-import { officerStats, initialOfficerRoster, bayOptions } from '../../data/manager/officers';
-import { 
-  Users, 
-  ShieldCheck, 
-  UserPlus, 
-  Clock, 
-  Star, 
-  Building2,
-  Check
+import React, { useState, useEffect } from 'react';
+import {
+  UserCheck,
+  Building,
+  ShieldCheck,
+  Edit3,
+  X,
+  CheckCircle2,
+  Clock,
+  UserX,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import managerStorage from '../../utils/managerStorage';
+import { useToastContext } from '../../context/ToastContext';
+
+const COUNTER_OPTIONS = [
+  'Counter 1 (Gate & Token Verification)',
+  'Counter 2 (Quality & Moisture Inspection)',
+  'Counter 3 (Digital Weighbridge Scale)',
+  'Counter 4 (Procurement Receipt & DBT)',
+  'Counter 5 (Gunny Bag Storage & Loading)',
+  'Relief / Mobile Counter',
+];
 
 export const OfficerManagement = () => {
-  const [officerRoster, setOfficerRoster] = useState(initialOfficerRoster);
-  const [showDeployModal, setShowDeployModal] = useState(false);
-  const [deployForm, setDeployForm] = useState({
-    name: '',
-    badge: 'INS-PB-408',
-    shift: 'Morning (08:00 - 14:00)',
-    bay: 'Gate 1 Intake',
-  });
+  const toastCtx = useToastContext();
+  const addToast = toastCtx?.addToast;
 
-  const handleDeploySubmit = (e) => {
-    e.preventDefault();
-    const newOfficer = {
-      id: `OFF-${100 + officerRoster.length + 1}`,
-      name: deployForm.name,
-      badge: deployForm.badge,
-      bay: deployForm.bay,
-      shift: deployForm.shift,
-      status: 'On Duty',
-      rating: 4.5,
-      verifiedCount: 0,
-    };
-    setOfficerRoster((prev) => [...prev, newOfficer]);
-    setShowDeployModal(false);
-    setDeployForm({ name: '', badge: 'INS-PB-408', shift: 'Morning (08:00 - 14:00)', bay: 'Gate 1 Intake' });
+  const [officers, setOfficers] = useState(() => managerStorage.getOfficers());
+
+  // Modal States
+  const [counterModalOpen, setCounterModalOpen] = useState(false);
+  const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [selectedOfficer, setSelectedOfficer] = useState(null);
+
+  const [newCounter, setNewCounter] = useState('');
+  const [newStatus, setNewStatus] = useState('Available');
+
+  useEffect(() => {
+    setOfficers(managerStorage.getOfficers());
+  }, []);
+
+  const openCounterModal = (officer) => {
+    setSelectedOfficer(officer);
+    setNewCounter(officer.assignedCounter);
+    setCounterModalOpen(true);
   };
 
-  const handleAssignOfficer = (officerId, newBay) => {
-    setOfficerRoster((prev) =>
-      prev.map((o) => (o.id === officerId ? { ...o, bay: newBay } : o))
-    );
+  const handleSaveCounter = (e) => {
+    e.preventDefault();
+    if (!selectedOfficer) return;
+    const updated = managerStorage.assignOfficerCounter(selectedOfficer.id, newCounter);
+    setOfficers(updated);
+    setCounterModalOpen(false);
+    if (addToast) addToast(`Counter assigned to ${selectedOfficer.officerName}.`, 'success');
+  };
+
+  const openStatusModal = (officer) => {
+    setSelectedOfficer(officer);
+    setNewStatus(officer.status);
+    setStatusModalOpen(true);
+  };
+
+  const handleSaveStatus = (e) => {
+    e.preventDefault();
+    if (!selectedOfficer) return;
+    const updated = managerStorage.updateOfficerStatus(selectedOfficer.id, newStatus);
+    setOfficers(updated);
+    setStatusModalOpen(false);
+    if (addToast) addToast(`Status updated to "${newStatus}" for ${selectedOfficer.officerName}.`, 'info');
   };
 
   return (
-    <div className="space-y-6 font-['Inter']">
-      {/* Page Header */}
-      <div className="bg-white p-6 rounded-[18px] border border-[#E5E7EB] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#166534] flex items-center justify-center font-bold">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold font-['Poppins'] text-[#111827]">
-                Procurement Officer Roster &amp; Duty Roster
-              </h1>
-              <p className="text-xs text-slate-500 font-['Inter'] mt-0.5">
-                Manage inspector shifts, weighbridge station deployments, and quality testing rosters
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <button
-          onClick={() => setShowDeployModal(true)}
-          className="h-11 px-5 bg-[#166534] hover:bg-[#14532d] text-white font-semibold text-xs font-['Poppins'] rounded-xl shadow-xs transition-all flex items-center gap-2 shrink-0"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Deploy New Officer</span>
-        </button>
+    <div className="space-y-6 max-w-6xl mx-auto select-none">
+      {/* ── HEADER ── */}
+      <div>
+        <h1 className="text-2xl font-black text-slate-900">Officer Management</h1>
+        <p className="text-xs text-slate-500 mt-1">
+          Monitor on-duty procurement officers, counter stations, and duty status
+        </p>
       </div>
 
-      {/* Overview Metrics — sourced from officerStats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatisticsCard
-          title="Total Officers Deployed"
-          value={officerStats.totalDeployed}
-          subtitle={officerStats.totalSub}
-          trend={officerStats.totalTrend}
-          isTrendPositive={true}
-          icon={Users}
-          color="emerald"
-        />
-        <StatisticsCard
-          title="On-Duty Shift Active"
-          value={officerStats.onDutyShift}
-          subtitle={officerStats.shiftSub}
-          trend={officerStats.shiftTrend}
-          isTrendPositive={true}
-          icon={Clock}
-          color="blue"
-        />
-        <StatisticsCard
-          title="Assigned Mandi Bays"
-          value={officerStats.assignedBays}
-          subtitle={officerStats.baysSub}
-          trend={officerStats.baysTrend}
-          isTrendPositive={true}
-          icon={Building2}
-          color="amber"
-        />
-        <StatisticsCard
-          title="Avg Efficiency Rating"
-          value={officerStats.avgRating}
-          subtitle={officerStats.ratingSub}
-          trend={officerStats.ratingTrend}
-          isTrendPositive={true}
-          icon={Star}
-          color="emerald"
-        />
-      </div>
-
-      {/* Officer Performance Table — passes roster and reassign handler */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold font-['Poppins'] text-[#111827]">
-            Active Inspector Duty Roster &amp; Performance
+      {/* ── OFFICER LIST TABLE ── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
+          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Centre Officers List ({officers.length} Registered Officers)
           </h2>
+          <span className="text-xs text-slate-500">
+            Available: <strong className="text-emerald-700">{officers.filter(o => o.status === 'Available').length}</strong>
+          </span>
         </div>
 
-        <OfficerPerformanceTable
-          officersData={officerRoster}
-          onAssignOfficer={handleAssignOfficer}
-        />
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="px-5 py-3.5">Officer Name</th>
+                <th className="px-5 py-3.5">Assigned Counter</th>
+                <th className="px-5 py-3.5">Current Status</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
+              {officers.map((officer) => {
+                return (
+                  <tr key={officer.id} className="hover:bg-slate-50 transition-colors">
+                    {/* 1. Officer Name */}
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center font-bold text-xs shrink-0">
+                          {officer.officerName.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 text-sm">{officer.officerName}</p>
+                          <p className="text-[11px] text-slate-400 font-mono">{officer.badgeNo}</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* 2. Assigned Counter */}
+                    <td className="px-5 py-4">
+                      <span className="font-semibold text-slate-800 text-sm block">
+                        {officer.assignedCounter}
+                      </span>
+                    </td>
+
+                    {/* 3. Current Status (Available / Busy / On Leave) */}
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
+                          officer.status === 'Available'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : officer.status === 'Busy'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            officer.status === 'Available'
+                              ? 'bg-emerald-600'
+                              : officer.status === 'Busy'
+                              ? 'bg-amber-600 animate-pulse'
+                              : 'bg-slate-400'
+                          }`}
+                        />
+                        {officer.status}
+                      </span>
+                    </td>
+
+                    {/* Buttons: Assign Counter & Update Status */}
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openCounterModal(officer)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                        >
+                          <Building className="w-3.5 h-3.5" />
+                          <span>Assign Counter</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => openStatusModal(officer)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Update Status</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Deploy New Officer Modal */}
-      {showDeployModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-[18px] p-6 max-w-md w-full border border-[#E5E7EB] shadow-2xl space-y-4 font-['Inter']"
-          >
+      {/* ── ASSIGN COUNTER MODAL ── */}
+      {counterModalOpen && selectedOfficer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-['Poppins'] font-bold text-base text-[#111827]">
-                Deploy Officer to Mandi Station
-              </h3>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                  Station Assignment
+                </span>
+                <h3 className="text-lg font-black text-slate-900 mt-1">
+                  Assign Counter
+                </h3>
+              </div>
               <button
-                onClick={() => setShowDeployModal(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
+                type="button"
+                onClick={() => setCounterModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleDeploySubmit} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveCounter} className="space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-slate-700 mb-1 font-['Inter']">
-                  Inspector Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Navjot Singh"
-                  value={deployForm.name}
-                  onChange={(e) => setDeployForm({ ...deployForm, name: e.target.value })}
-                  className="w-full h-11 px-4 border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534]"
-                  required
-                />
+                <span className="text-slate-500 font-medium block">Officer:</span>
+                <p className="text-sm font-bold text-slate-900 mt-0.5">
+                  {selectedOfficer.officerName} ({selectedOfficer.badgeNo})
+                </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1 font-['Inter']">
-                    Badge Number
-                  </label>
-                  <input
-                    type="text"
-                    value={deployForm.badge}
-                    onChange={(e) => setDeployForm({ ...deployForm, badge: e.target.value })}
-                    className="w-full h-11 px-4 font-['Roboto_Mono'] border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534]"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1 font-['Inter']">
-                    Shift Selection
-                  </label>
-                  <select
-                    value={deployForm.shift}
-                    onChange={(e) => setDeployForm({ ...deployForm, shift: e.target.value })}
-                    className="w-full h-11 px-3 border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534] font-['Poppins']"
-                  >
-                    <option value="Morning (08:00 - 14:00)">Morning Shift</option>
-                    <option value="Evening (14:00 - 20:00)">Evening Shift</option>
-                    <option value="Night (20:00 - 02:00)">Night Shift</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1 font-['Inter']">
-                  Assigned Mandi Duty Station / Bay
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase tracking-wider block">
+                  Select Counter Station <span className="text-rose-600">*</span>
                 </label>
                 <select
-                  value={deployForm.bay}
-                  onChange={(e) => setDeployForm({ ...deployForm, bay: e.target.value })}
-                  className="w-full h-11 px-3 border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534] font-['Poppins']"
+                  value={newCounter}
+                  onChange={(e) => setNewCounter(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-emerald-700 focus:outline-hidden"
                 >
-                  {bayOptions.map((bay) => (
-                    <option key={bay} value={bay}>{bay}</option>
+                  {COUNTER_OPTIONS.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setShowDeployModal(false)}
-                  className="h-11 px-5 rounded-xl border border-[#E5E7EB] font-semibold font-['Poppins'] text-slate-600 hover:bg-slate-50"
+                  onClick={() => setCounterModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="h-11 px-5 rounded-xl bg-[#166534] hover:bg-[#14532d] text-white font-semibold font-['Poppins'] flex items-center gap-1.5 shadow-xs"
+                  className="px-5 py-2.5 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-900 shadow-xs transition-colors"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>Confirm Deployment</span>
+                  Save Counter
                 </button>
               </div>
             </form>
-          </motion.div>
+          </div>
+        </div>
+      )}
+
+      {/* ── UPDATE STATUS MODAL ── */}
+      {statusModalOpen && selectedOfficer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                  Duty Status
+                </span>
+                <h3 className="text-lg font-black text-slate-900 mt-1">
+                  Update Officer Status
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStatusModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveStatus} className="space-y-4 text-xs">
+              <div>
+                <span className="text-slate-500 font-medium block">Officer:</span>
+                <p className="text-sm font-bold text-slate-900 mt-0.5">
+                  {selectedOfficer.officerName} ({selectedOfficer.badgeNo})
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="font-bold text-slate-700 uppercase tracking-wider block">
+                  Select Duty Status <span className="text-rose-600">*</span>
+                </label>
+                <div className="space-y-2">
+                  {[
+                    { val: 'Available', label: 'Available (Active on counter)', color: 'border-emerald-500 text-emerald-800 bg-emerald-50' },
+                    { val: 'Busy', label: 'Busy (Conducting inspection / verification)', color: 'border-amber-500 text-amber-800 bg-amber-50' },
+                    { val: 'On Leave', label: 'On Leave (Off-duty / authorized absence)', color: 'border-slate-400 text-slate-700 bg-slate-50' },
+                  ].map((s) => (
+                    <label
+                      key={s.val}
+                      className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                        newStatus === s.val
+                          ? `${s.color} font-bold shadow-xs`
+                          : 'border-slate-200 hover:border-slate-300 text-slate-700'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="officerStatus"
+                        value={s.val}
+                        checked={newStatus === s.val}
+                        onChange={(e) => setNewStatus(e.target.value)}
+                        className="text-emerald-800 focus:ring-emerald-700"
+                      />
+                      <span className="text-xs">{s.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setStatusModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-900 shadow-xs transition-colors"
+                >
+                  Confirm Status
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

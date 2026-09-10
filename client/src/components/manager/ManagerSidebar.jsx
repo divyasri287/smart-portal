@@ -1,65 +1,104 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Activity, 
-  Calendar, 
-  ShieldCheck, 
-  FileSpreadsheet, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  ListOrdered,
+  CalendarClock,
+  UserCheck,
+  FileText,
   AlertTriangle,
   Bell,
   User,
-  Shield,
+  LogOut,
   Building2,
-  LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import managerStorage from '../../utils/managerStorage';
 
 export const ManagerSidebar = ({ onCloseMobile }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
+
+  const [profile, setProfile] = useState(() => managerStorage.getProfile());
+  const [centreStatus, setCentreStatus] = useState(() => managerStorage.getCentreStatus());
+
+  useEffect(() => {
+    // Listen for status/profile changes
+    const interval = setInterval(() => {
+      setProfile(managerStorage.getProfile());
+      setCentreStatus(managerStorage.getCentreStatus());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const links = [
+    { to: '/manager/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/manager/queue-monitoring', label: 'Queue Monitoring', icon: ListOrdered },
+    { to: '/manager/slot-management', label: 'Slot Management', icon: CalendarClock },
+    { to: '/manager/officer-management', label: 'Officer Management', icon: UserCheck },
+    { to: '/manager/reports', label: 'Reports', icon: FileText },
+    { to: '/manager/issues', label: 'Issues', icon: AlertTriangle },
+    { to: '/manager/notifications', label: 'Notifications', icon: Bell },
+    { to: '/manager/profile', label: 'Profile', icon: User },
+  ];
 
   const handleLogout = () => {
     logout();
     navigate('/select-role');
     if (onCloseMobile) onCloseMobile();
   };
-  const mainLinks = [
-    { to: '/manager/dashboard', label: 'Command Centre', icon: LayoutDashboard, badge: null },
-    { to: '/manager/queue-monitoring', label: 'Queue Oversight', icon: Activity, badge: 'Live' },
-    { to: '/manager/slot-management', label: 'Slot Allocation', icon: Calendar, badge: null },
-    { to: '/manager/officer-management', label: 'Officer Deployment', icon: ShieldCheck, badge: '8 On Duty' },
-    { to: '/manager/reports', label: 'Centre Reports', icon: FileSpreadsheet, badge: null },
-    { to: '/manager/analytics', label: 'Mandi Analytics', icon: BarChart3, badge: null },
-    { to: '/manager/issues', label: 'Grievances & Issues', icon: AlertTriangle, badge: '2 Open', badgeColor: 'bg-amber-100 text-amber-800' },
-  ];
-
-  const secondaryLinks = [
-    { to: '/manager/notifications', label: 'Centre Alerts', icon: Bell, badge: '3' },
-    { to: '/manager/profile', label: 'Centre Profile', icon: User, badge: null },
-  ];
 
   return (
-    <nav className="flex flex-col h-full bg-white p-3 text-[#111827] font-['Inter']">
-      {/* Mandi Identity Header */}
-      <div className="px-3.5 py-3 mb-2 bg-gradient-to-r from-emerald-950 via-[#166534] to-[#15803D] text-white rounded-[16px] shadow-xs">
-        <div className="flex items-center gap-2 mb-1">
-          <Building2 className="w-4 h-4 text-amber-300" />
-          <span className="text-[10px] font-extrabold font-['Poppins'] tracking-wider uppercase text-amber-200">
-            Centre Manager
-          </span>
+    <aside className="flex flex-col h-full bg-white border-r border-slate-200 select-none">
+      {/* Centre Manager Mandi Header */}
+      <div className="p-4 border-b border-emerald-900 bg-emerald-800 text-white shrink-0">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 bg-white/10 rounded-lg">
+            <Building2 className="w-5 h-5 text-emerald-200" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-200 block">
+              Govt Procurement Centre
+            </span>
+            <span className="text-xs font-black tracking-tight text-white block">
+              Centre Manager Portal
+            </span>
+          </div>
         </div>
-        <p className="text-xs font-bold font-['Poppins'] truncate">Ludhiana Mandi (PB-4)</p>
-        <p className="text-[10px] text-emerald-200 font-['Roboto_Mono']">Chief: Anil Kumar</p>
+
+        {/* Centre Name & Real-Time Status */}
+        <div className="bg-emerald-900/90 border border-emerald-700/60 rounded-xl p-2.5 mt-2">
+          <p className="text-xs font-bold text-white truncate leading-tight">
+            {profile.centreName || 'Salem Main Procurement Centre #402'}
+          </p>
+          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-emerald-800 text-[11px]">
+            <span className="text-emerald-200 font-medium truncate">
+              {profile.name || 'Anil Kumar'}
+            </span>
+            <span
+              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                centreStatus === 'Open'
+                  ? 'bg-emerald-500 text-emerald-950'
+                  : 'bg-rose-500 text-white'
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                  centreStatus === 'Open' ? 'bg-emerald-950 animate-pulse' : 'bg-white'
+                }`}
+              />
+              {centreStatus}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Main Navigation Group */}
-      <div className="space-y-1">
-        <div className="px-3 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-['Poppins']">
-          Core Operations
+      {/* Navigation Links - Exactly the 8 required menu items */}
+      <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
+        <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+          Operations Menu
         </div>
-        {mainLinks.map((link) => {
+        {links.map((link) => {
           const Icon = link.icon;
           return (
             <NavLink
@@ -67,89 +106,32 @@ export const ManagerSidebar = ({ onCloseMobile }) => {
               to={link.to}
               onClick={onCloseMobile}
               className={({ isActive }) =>
-                `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   isActive
-                    ? 'bg-[#166534] text-white font-semibold shadow-xs'
-                    : 'text-slate-700 hover:bg-emerald-50 hover:text-[#166534]'
+                    ? 'bg-emerald-800 text-white shadow-xs font-bold'
+                    : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-900'
                 }`
               }
             >
-              <div className="flex items-center gap-3">
-                <Icon className="w-4 h-4 shrink-0" />
-                <span className="font-['Poppins']">{link.label}</span>
-              </div>
-              {link.badge && (
-                <span
-                  className={`text-[10px] font-bold font-['Roboto_Mono'] px-2 py-0.5 rounded-full ${
-                    link.badgeColor || 'bg-emerald-100 text-[#166534]'
-                  }`}
-                >
-                  {link.badge}
-                </span>
-              )}
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{link.label}</span>
             </NavLink>
           );
         })}
-      </div>
+      </nav>
 
-      <div className="my-3 border-t border-[#E5E7EB]" />
-
-      {/* System Settings & Setup Group */}
-      <div className="space-y-1">
-        <div className="px-3 py-1.5 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-['Poppins']">
-          Management & Setup
-        </div>
-        {secondaryLinks.map((link) => {
-          const Icon = link.icon;
-          return (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              onClick={onCloseMobile}
-              className={({ isActive }) =>
-                `flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                  isActive
-                    ? 'bg-[#166534] text-white font-semibold shadow-xs'
-                    : 'text-slate-700 hover:bg-emerald-50 hover:text-[#166534]'
-                }`
-              }
-            >
-              <div className="flex items-center gap-3">
-                <Icon className="w-4 h-4 shrink-0" />
-                <span className="font-['Poppins']">{link.label}</span>
-              </div>
-              {link.badge && (
-                <span className="text-[10px] font-bold font-['Roboto_Mono'] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                  {link.badge}
-                </span>
-              )}
-            </NavLink>
-          );
-        })}
-      </div>
-
-      {/* Footer Support Info */}
-      <div className="mt-auto pt-4 border-t border-[#E5E7EB] px-1 space-y-3">
-        {/* Logout Button */}
+      {/* Logout Button (Bottom of Sidebar) */}
+      <div className="p-3 border-t border-slate-200 bg-slate-50 shrink-0">
         <button
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50/70 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 transition-colors cursor-pointer"
+          className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 shadow-2xs transition-all cursor-pointer"
         >
           <LogOut className="w-4 h-4 text-rose-600 shrink-0" />
           <span>Logout</span>
         </button>
-
-        <div className="p-3 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl text-[11px] text-slate-600">
-          <div className="flex items-center gap-2 text-[#166534] font-bold font-['Poppins'] mb-1">
-            <Shield className="w-3.5 h-3.5" />
-            <span>NIC Mandi Portal</span>
-          </div>
-          <p className="text-[10px] text-slate-500 font-['Inter']">Helpline: 1800-180-1551</p>
-          <p className="text-[10px] text-slate-500 font-['Roboto_Mono']">System v2.4</p>
-        </div>
       </div>
-    </nav>
+    </aside>
   );
 };
 

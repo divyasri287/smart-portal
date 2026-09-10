@@ -1,281 +1,290 @@
-import React, { useState } from 'react';
-import StatisticsCard from '../../components/manager/StatisticsCard';
-import { complaintStats, initialComplaintsList } from '../../data/manager/complaints';
-import { 
-  AlertTriangle, 
-  CheckCircle2, 
-  Clock, 
-  Filter, 
-  Search, 
-  FileText, 
-  Check
+import React, { useState, useEffect } from 'react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Plus,
+  X,
+  Clock,
+  User,
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import managerStorage from '../../utils/managerStorage';
+import { useToastContext } from '../../context/ToastContext';
 
 export const Issues = () => {
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [selectedTicket, setSelectedTicket] = useState(null);
-  const [resolutionNote, setResolutionNote] = useState('');
-  const [tickets, setTickets] = useState(initialComplaintsList);
+  const toastCtx = useToastContext();
+  const addToast = toastCtx?.addToast;
 
-  const handleResolveTicket = (status) => {
-    if (!selectedTicket) return;
-    setTickets(tickets.map((t) => {
-      if (t.ticketId === selectedTicket.ticketId) {
-        return { ...t, status };
-      }
-      return t;
-    }));
-    setSelectedTicket(null);
-    setResolutionNote('');
+  const [issues, setIssues] = useState(() => managerStorage.getIssues());
+  const [modalOpen, setModalOpen] = useState(false);
+
+  // New issue form fields
+  const [issueTitle, setIssueTitle] = useState('');
+  const [reportedBy, setReportedBy] = useState('');
+  const [priority, setPriority] = useState('High');
+
+  useEffect(() => {
+    setIssues(managerStorage.getIssues());
+  }, []);
+
+  const handleResolve = (id, title) => {
+    const updated = managerStorage.resolveIssue(id);
+    setIssues(updated);
+    if (addToast) addToast(`Issue "${title}" marked as RESOLVED.`, 'success');
   };
 
-  const filteredTickets = tickets.filter((t) => {
-    const matchesSearch =
-      t.ticketId.toLowerCase().includes(search.toLowerCase()) ||
-      t.farmerName.toLowerCase().includes(search.toLowerCase()) ||
-      t.category.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === 'All' || t.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const handleClose = (id, title) => {
+    const updated = managerStorage.closeIssue(id);
+    setIssues(updated);
+    if (addToast) addToast(`Issue "${title}" has been CLOSED.`, 'info');
+  };
+
+  const handleCreateIssue = (e) => {
+    e.preventDefault();
+    if (!issueTitle.trim()) return;
+
+    const newIssue = {
+      issueTitle: issueTitle.trim(),
+      reportedBy: reportedBy.trim() || 'Centre Staff',
+      priority,
+    };
+
+    const updated = managerStorage.addIssue(newIssue);
+    setIssues(updated);
+    setModalOpen(false);
+    setIssueTitle('');
+    setReportedBy('');
+    setPriority('High');
+    if (addToast) addToast('New operational issue logged successfully.', 'success');
+  };
 
   return (
-    <div className="space-y-6 font-['Inter']">
-      {/* Page Header */}
-      <div className="bg-white p-6 rounded-[18px] border border-[#E5E7EB] shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="space-y-6 max-w-6xl mx-auto select-none">
+      {/* ── HEADER & REPORT BUTTON ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold font-['Poppins'] text-[#111827]">
-                Grievances &amp; Moisture Disputes Resolution Desk
-              </h1>
-              <p className="text-xs text-slate-500 font-['Inter'] mt-0.5">
-                Review farmer complaints raised at Mandi Helpdesk, moisture sample disputes &amp; payment hold issues
-              </p>
-            </div>
-          </div>
+          <h1 className="text-2xl font-black text-slate-900">Centre Issues</h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Track, resolve, and close operational and technical issues at the procurement centre
+          </p>
         </div>
+        <button
+          type="button"
+          onClick={() => setModalOpen(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-emerald-800 hover:bg-emerald-900 text-white shadow-xs transition-all cursor-pointer"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Report New Issue</span>
+        </button>
       </div>
 
-      {/* Metrics Cards — sourced from complaintStats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatisticsCard
-          title="Open Grievances"
-          value={`${tickets.filter(t => t.status !== 'Resolved').length} Tickets`}
-          subtitle={complaintStats.openSub}
-          trend={complaintStats.openTrend}
-          isTrendPositive={false}
-          icon={AlertTriangle}
-          color="amber"
-        />
-        <StatisticsCard
-          title="Resolved Today"
-          value={complaintStats.resolvedToday}
-          subtitle={complaintStats.resolvedSub}
-          trend={complaintStats.resolvedTrend}
-          isTrendPositive={true}
-          icon={CheckCircle2}
-          color="emerald"
-        />
-        <StatisticsCard
-          title="Moisture Re-tests"
-          value={complaintStats.moistureRetests}
-          subtitle={complaintStats.retestsSub}
-          trend={complaintStats.retestsTrend}
-          isTrendPositive={true}
-          icon={FileText}
-          color="blue"
-        />
-        <StatisticsCard
-          title="Avg Resolution Time"
-          value={complaintStats.avgResolutionTime}
-          subtitle={complaintStats.avgSub}
-          trend={complaintStats.avgTrend}
-          isTrendPositive={true}
-          icon={Clock}
-          color="emerald"
-        />
-      </div>
-
-      {/* Dataset Table */}
-      <div className="bg-white rounded-[18px] border border-[#E5E7EB] shadow-xs overflow-hidden">
-        {/* Table Filter controls */}
-        <div className="p-4 sm:p-5 border-b border-[#E5E7EB] bg-[#F8FAFC] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search ticket ID, farmer name, or category..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 text-xs bg-white border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534]"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-500" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-11 px-3 bg-white border border-[#E5E7EB] rounded-xl text-xs font-semibold text-slate-700 font-['Poppins'] focus:outline-none focus:border-[#166534]"
-            >
-              <option value="All">All Statuses</option>
-              <option value="Pending Review">Pending Review</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-          </div>
+      {/* ── ISSUES LIST TABLE ── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
+          <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Operational Grievances &amp; Equipment Issues ({issues.length} Records)
+          </h2>
+          <span className="text-xs text-slate-500">
+            Open: <strong className="text-rose-700">{issues.filter(i => i.status === 'Open').length}</strong>
+          </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse font-['Inter']">
-            <thead>
-              <tr className="bg-slate-100/70 border-b border-[#E5E7EB] text-[11px] font-bold text-slate-600 uppercase tracking-wider font-['Poppins']">
-                <th className="py-3.5 px-4">Ticket ID</th>
-                <th className="py-3.5 px-4">Farmer Details</th>
-                <th className="py-3.5 px-4">Dispute Category</th>
-                <th className="py-3.5 px-4">Date Submitted</th>
-                <th className="py-3.5 px-4">Priority</th>
-                <th className="py-3.5 px-4">Status</th>
-                <th className="py-3.5 px-4 text-right">Action</th>
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="px-5 py-3.5">Issue Title</th>
+                <th className="px-5 py-3.5">Reported By</th>
+                <th className="px-5 py-3.5">Priority</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
-              {filteredTickets.map((t) => (
-                <tr key={t.ticketId} className="hover:bg-amber-50/20 transition-colors">
-                  <td className="py-3.5 px-4 font-bold font-['Roboto_Mono'] text-[#166534]">
-                    {t.ticketId}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <p className="font-bold text-[#111827] font-['Poppins']">{t.farmerName}</p>
-                    <p className="text-[11px] text-slate-500 font-['Roboto_Mono']">{t.farmerPhone}</p>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span className="inline-block px-2.5 py-1 rounded-lg bg-[#F8FAFC] text-slate-800 font-medium border border-[#E5E7EB]">
-                      {t.category}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 font-['Roboto_Mono'] text-slate-600">
-                    {t.date}
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-extrabold font-['Roboto_Mono'] uppercase ${
-                        t.priority === 'High'
-                          ? 'bg-red-100 text-red-800 border border-red-200'
-                          : t.priority === 'Medium'
-                          ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
-                      {t.priority}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold font-['Roboto_Mono'] text-[11px] ${
-                        t.status === 'Resolved'
-                          ? 'bg-emerald-100 text-[#166534]'
-                          : t.status === 'In Progress'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                      {t.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-right">
-                    <button
-                      onClick={() => setSelectedTicket(t)}
-                      className="h-9 px-3.5 rounded-lg bg-white border border-[#166534] text-[#166534] hover:bg-[#166534] hover:text-white font-semibold text-xs font-['Poppins'] transition-all inline-flex items-center gap-1"
-                    >
-                      <span>Review Ticket</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
+              {issues.map((item) => {
+                const isOpen = item.status === 'Open';
+                const isResolved = item.status === 'Resolved';
+                const isClosed = item.status === 'Closed';
+
+                return (
+                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                    {/* 1. Issue Title */}
+                    <td className="px-5 py-4">
+                      <div>
+                        <p className="font-bold text-slate-900 text-sm">{item.issueTitle}</p>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                          <span className="font-mono">{item.id}</span>
+                          <span>·</span>
+                          <span>{item.timestamp || 'Today'}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* 2. Reported By */}
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="font-semibold text-slate-800">{item.reportedBy}</span>
+                      </div>
+                    </td>
+
+                    {/* 3. Priority (High / Medium / Low) */}
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                          item.priority === 'High'
+                            ? 'bg-rose-100 text-rose-800'
+                            : item.priority === 'Medium'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        {item.priority}
+                      </span>
+                    </td>
+
+                    {/* 4. Status (Open / Resolved / Closed) */}
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                          isOpen
+                            ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                            : isResolved
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                            isOpen
+                              ? 'bg-rose-600 animate-pulse'
+                              : isResolved
+                              ? 'bg-emerald-600'
+                              : 'bg-slate-400'
+                          }`}
+                        />
+                        {item.status}
+                      </span>
+                    </td>
+
+                    {/* Buttons: Resolve & Close */}
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleResolve(item.id, item.issueTitle)}
+                          disabled={isResolved || isClosed}
+                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold shadow-xs transition-all ${
+                            isResolved || isClosed
+                              ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                              : 'bg-emerald-800 hover:bg-emerald-900 text-white cursor-pointer'
+                          }`}
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Resolve</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleClose(item.id, item.issueTitle)}
+                          disabled={isClosed}
+                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            isClosed
+                              ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 cursor-pointer'
+                          }`}
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>Close</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Review Ticket Modal */}
-      {selectedTicket && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-[18px] p-6 max-w-lg w-full border border-[#E5E7EB] shadow-2xl space-y-4 font-['Inter']"
-          >
+      {/* ── CREATE ISSUE MODAL ── */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="font-['Poppins'] font-bold text-base text-[#111827]">
-                  Resolve Ticket {selectedTicket.ticketId}
-                </h3>
-                <p className="text-xs text-slate-500">{selectedTicket.category}</p>
-              </div>
+              <h3 className="text-lg font-black text-slate-900">
+                Report Operational Issue
+              </h3>
               <button
-                onClick={() => setSelectedTicket(null)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="p-3.5 bg-[#F8FAFC] rounded-xl border border-[#E5E7EB]">
-                <p className="text-[10px] text-slate-400 uppercase font-bold font-['Poppins']">Farmer Description</p>
-                <p className="text-slate-800 font-medium mt-1 leading-relaxed">
-                  {selectedTicket.description}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-slate-700">
-                <div className="p-2.5 bg-[#F8FAFC] rounded-lg border border-[#E5E7EB]">
-                  <span className="text-[10px] text-slate-400 uppercase block font-['Poppins']">Duty Station</span>
-                  <span className="font-bold font-['Poppins']">{selectedTicket.bay}</span>
-                </div>
-                <div className="p-2.5 bg-[#F8FAFC] rounded-lg border border-[#E5E7EB]">
-                  <span className="text-[10px] text-slate-400 uppercase block font-['Poppins']">Inspector</span>
-                  <span className="font-bold font-['Poppins']">{selectedTicket.assignedInspector}</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1 font-['Inter']">
-                  Manager Resolution Decision &amp; Audit Notes
+            <form onSubmit={handleCreateIssue} className="space-y-4 text-xs">
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase tracking-wider block">
+                  Issue Title <span className="text-rose-600">*</span>
                 </label>
-                <textarea
-                  rows="3"
-                  placeholder="Enter manager audit findings or re-testing result..."
-                  value={resolutionNote}
-                  onChange={(e) => setResolutionNote(e.target.value)}
-                  className="w-full p-3 text-xs bg-white border border-[#E5E7EB] rounded-xl focus:outline-none focus:border-[#166534]"
+                <input
+                  type="text"
+                  placeholder="e.g. Weighbridge Sensor Calibration Required"
+                  value={issueTitle}
+                  onChange={(e) => setIssueTitle(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-emerald-700 focus:outline-hidden"
+                  required
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 font-['Poppins']">
-                <button
-                  onClick={() => handleResolveTicket('In Progress')}
-                  className="h-11 px-5 rounded-xl border border-blue-600 text-blue-700 hover:bg-blue-50 font-semibold text-xs transition-all"
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase tracking-wider block">
+                  Reported By (Officer / Staff) <span className="text-rose-600">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Inspector Vikram Sharma"
+                  value={reportedBy}
+                  onChange={(e) => setReportedBy(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-emerald-700 focus:outline-hidden"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-700 uppercase tracking-wider block">
+                  Priority Level
+                </label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-emerald-700 focus:outline-hidden"
                 >
-                  Mark In-Progress
+                  <option value="High">High Priority</option>
+                  <option value="Medium">Medium Priority</option>
+                  <option value="Low">Low Priority</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  Cancel
                 </button>
                 <button
-                  onClick={() => handleResolveTicket('Resolved')}
-                  className="h-11 px-5 rounded-xl bg-[#166534] hover:bg-[#14532d] text-white font-semibold text-xs shadow-xs flex items-center gap-1.5 transition-all"
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl font-bold text-white bg-emerald-800 hover:bg-emerald-900 shadow-xs transition-colors"
                 >
-                  <Check className="w-4 h-4" />
-                  <span>Resolve &amp; Close</span>
+                  Submit Issue
                 </button>
               </div>
-            </div>
-          </motion.div>
+            </form>
+          </div>
         </div>
       )}
     </div>
