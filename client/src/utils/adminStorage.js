@@ -1,5 +1,5 @@
 // Smart Procurement Portal - Government Admin Storage Utility
-// Persistent LocalStorage utility for SIH 2026 Government Admin Module
+// Production-grade LocalStorage utility for SIH 2026 Government Admin Module
 
 const STORAGE_KEYS = {
   CENTRES: 'spp_admin_centres',
@@ -264,96 +264,322 @@ const DEFAULT_OFFICERS = [
   },
 ];
 
+// Rich, multi-district dataset representing large-scale DBT payment processing
 const DEFAULT_PAYMENTS = [
   {
-    id: 'PAY-901',
+    id: 'PAY-1001',
     farmerName: 'Ramanathan G.',
     farmerPhone: '+91 98421 11223',
+    aadhaarMasked: '•••• •••• 4128',
     tokenNumber: 'TKN-TN-8821',
     crop: 'Paddy (Grade A)',
     quantityQuintals: 42.5,
-    amount: 97070,
+    mspPerQuintal: 2320,
+    amount: 98600,
     status: 'Pending',
     date: '2026-09-10',
     centreName: 'Salem Main Procurement Centre #402',
+    district: 'Salem',
     accountNumber: '•••• 4519',
     ifsc: 'SBIN0001245',
     bankName: 'State Bank of India',
+    utrNumber: '',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
   },
   {
-    id: 'PAY-902',
-    farmerName: 'Harbhajan Singh',
+    id: 'PAY-1002',
+    farmerName: 'Harbhajan Singh Sandhu',
     farmerPhone: '+91 98140 22334',
+    aadhaarMasked: '•••• •••• 8841',
     tokenNumber: 'TKN-PB-4412',
     crop: 'Wheat (FAQ Standard)',
     quantityQuintals: 65.0,
+    mspPerQuintal: 2275,
     amount: 147875,
     status: 'Completed',
     date: '2026-09-10',
     centreName: 'Ludhiana Central Mandi Yard #12',
+    district: 'Ludhiana',
     accountNumber: '•••• 8820',
     ifsc: 'PUNB0021400',
     bankName: 'Punjab National Bank',
+    utrNumber: 'PFMS20260910008821',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
   },
   {
-    id: 'PAY-903',
+    id: 'PAY-1003',
     farmerName: 'Devinder Kumar',
     farmerPhone: '+91 98961 33445',
+    aadhaarMasked: '•••• •••• 9912',
     tokenNumber: 'TKN-HR-1903',
     crop: 'Wheat (FAQ Standard)',
     quantityQuintals: 38.0,
+    mspPerQuintal: 2275,
     amount: 86450,
     status: 'Pending',
     date: '2026-09-09',
     centreName: 'Karnal Grain Mandi Bay 3',
+    district: 'Karnal',
     accountNumber: '•••• 3192',
     ifsc: 'HDFC0000452',
     bankName: 'HDFC Bank',
+    utrNumber: '',
+    statutoryDeadline: '11 Sep 2026',
+    discrepancyReason: '',
   },
   {
-    id: 'PAY-904',
+    id: 'PAY-1004',
     farmerName: 'K. Palanisamy',
     farmerPhone: '+91 94431 44556',
+    aadhaarMasked: '•••• •••• 1042',
     tokenNumber: 'TKN-TN-7714',
     crop: 'Paddy (Common)',
     quantityQuintals: 55.0,
-    amount: 121000,
+    mspPerQuintal: 2300,
+    amount: 126500,
     status: 'Completed',
     date: '2026-09-09',
     centreName: 'Thanjavur Direct Purchase Centre',
+    district: 'Thanjavur',
     accountNumber: '•••• 7014',
     ifsc: 'IOBA0000142',
     bankName: 'Indian Overseas Bank',
+    utrNumber: 'PFMS20260909007714',
+    statutoryDeadline: '11 Sep 2026',
+    discrepancyReason: '',
   },
   {
-    id: 'PAY-905',
+    id: 'PAY-1005',
     farmerName: 'Gurmeet Ram',
     farmerPhone: '+91 98150 55667',
+    aadhaarMasked: '•••• •••• 6631',
     tokenNumber: 'TKN-PB-9905',
     crop: 'Wheat (FAQ Standard)',
     quantityQuintals: 72.0,
+    mspPerQuintal: 2275,
     amount: 163800,
     status: 'Pending',
     date: '2026-09-08',
     centreName: 'Sangrur Food Grain Complex',
+    district: 'Sangrur',
     accountNumber: '•••• 1205',
     ifsc: 'PUNB0045100',
     bankName: 'Punjab National Bank',
+    utrNumber: '',
+    statutoryDeadline: '10 Sep 2026',
+    discrepancyReason: '',
   },
   {
-    id: 'PAY-906',
+    id: 'PAY-1006',
     farmerName: 'M. Selvam',
     farmerPhone: '+91 97892 66778',
+    aadhaarMasked: '•••• •••• 3055',
     tokenNumber: 'TKN-TN-6602',
     crop: 'Ragi (Finger Millet)',
     quantityQuintals: 24.0,
-    amount: 103000,
+    mspPerQuintal: 4290,
+    amount: 102960,
     status: 'Completed',
     date: '2026-09-08',
     centreName: 'Salem Main Procurement Centre #402',
+    district: 'Salem',
     accountNumber: '•••• 6632',
     ifsc: 'SBIN0004112',
     bankName: 'State Bank of India',
+    utrNumber: 'PFMS20260908006602',
+    statutoryDeadline: '10 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1007',
+    farmerName: 'Balwinder Singh',
+    farmerPhone: '+91 98721 88990',
+    aadhaarMasked: '•••• •••• 7719',
+    tokenNumber: 'TKN-PB-5521',
+    crop: 'Wheat (FAQ Standard)',
+    quantityQuintals: 58.5,
+    mspPerQuintal: 2275,
+    amount: 133088,
+    status: 'In Clearing',
+    date: '2026-09-10',
+    centreName: 'Ludhiana Central Mandi Yard #12',
+    district: 'Ludhiana',
+    accountNumber: '•••• 9942',
+    ifsc: 'PUNB0031200',
+    bankName: 'Punjab National Bank',
+    utrNumber: 'BATCH-PFMS-CL-908',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1008',
+    farmerName: 'S. Arumugam',
+    farmerPhone: '+91 94435 77881',
+    aadhaarMasked: '•••• •••• 4420',
+    tokenNumber: 'TKN-TN-8843',
+    crop: 'Paddy (Grade A)',
+    quantityQuintals: 48.0,
+    mspPerQuintal: 2320,
+    amount: 111360,
+    status: 'Pending',
+    date: '2026-09-10',
+    centreName: 'Thanjavur Direct Purchase Centre',
+    district: 'Thanjavur',
+    accountNumber: '•••• 2209',
+    ifsc: 'CBIN0281045',
+    bankName: 'Central Bank of India',
+    utrNumber: '',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1009',
+    farmerName: 'Kuldeep Yadav',
+    farmerPhone: '+91 98124 66778',
+    aadhaarMasked: '•••• •••• 1928',
+    tokenNumber: 'TKN-HR-2281',
+    crop: 'Wheat (FAQ Standard)',
+    quantityQuintals: 40.0,
+    mspPerQuintal: 2275,
+    amount: 91000,
+    status: 'Pending',
+    date: '2026-09-10',
+    centreName: 'Karnal Grain Mandi Bay 3',
+    district: 'Karnal',
+    accountNumber: '•••• 8812',
+    ifsc: 'SBIN0002140',
+    bankName: 'State Bank of India',
+    utrNumber: '',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1010',
+    farmerName: 'P. Muthusamy',
+    farmerPhone: '+91 94862 33441',
+    aadhaarMasked: '•••• •••• 9011',
+    tokenNumber: 'TKN-TN-4409',
+    crop: 'Paddy (Grade A)',
+    quantityQuintals: 36.5,
+    mspPerQuintal: 2320,
+    amount: 84680,
+    status: 'Discrepancy',
+    date: '2026-09-09',
+    centreName: 'Salem Main Procurement Centre #402',
+    district: 'Salem',
+    accountNumber: '•••• 0019',
+    ifsc: 'TMBL0000108',
+    bankName: 'Tamilnad Mercantile Bank',
+    utrNumber: '',
+    statutoryDeadline: '11 Sep 2026',
+    discrepancyReason: 'NPCI Aadhaar-Bank Account mapping unlinked or dormant',
+  },
+  {
+    id: 'PAY-1011',
+    farmerName: 'Manmohan Singh Gill',
+    farmerPhone: '+91 98145 99001',
+    aadhaarMasked: '•••• •••• 6520',
+    tokenNumber: 'TKN-PB-6632',
+    crop: 'Wheat (FAQ Standard)',
+    quantityQuintals: 80.0,
+    mspPerQuintal: 2275,
+    amount: 182000,
+    status: 'In Clearing',
+    date: '2026-09-10',
+    centreName: 'Sangrur Food Grain Complex',
+    district: 'Sangrur',
+    accountNumber: '•••• 7711',
+    ifsc: 'HDFC0001240',
+    bankName: 'HDFC Bank',
+    utrNumber: 'BATCH-PFMS-CL-909',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1012',
+    farmerName: 'V. Sundaramurthy',
+    farmerPhone: '+91 97890 44552',
+    aadhaarMasked: '•••• •••• 8823',
+    tokenNumber: 'TKN-TN-9918',
+    crop: 'Paddy (Common)',
+    quantityQuintals: 52.0,
+    mspPerQuintal: 2300,
+    amount: 119600,
+    status: 'Completed',
+    date: '2026-09-07',
+    centreName: 'Thanjavur Direct Purchase Centre',
+    district: 'Thanjavur',
+    accountNumber: '•••• 3390',
+    ifsc: 'SBIN0000882',
+    bankName: 'State Bank of India',
+    utrNumber: 'PFMS20260907009918',
+    statutoryDeadline: '09 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1013',
+    farmerName: 'Surinder Pal',
+    farmerPhone: '+91 98114 22119',
+    aadhaarMasked: '•••• •••• 3419',
+    tokenNumber: 'TKN-HR-8820',
+    crop: 'Wheat (FAQ Standard)',
+    quantityQuintals: 44.0,
+    mspPerQuintal: 2275,
+    amount: 100100,
+    status: 'Pending',
+    date: '2026-09-10',
+    centreName: 'Ambala Cantt Procurement Depot',
+    district: 'Ambala',
+    accountNumber: '•••• 5521',
+    ifsc: 'PUNB0011900',
+    bankName: 'Punjab National Bank',
+    utrNumber: '',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1014',
+    farmerName: 'K. Rajendran',
+    farmerPhone: '+91 94420 11994',
+    aadhaarMasked: '•••• •••• 5590',
+    tokenNumber: 'TKN-TN-2210',
+    crop: 'Paddy (Grade A)',
+    quantityQuintals: 62.0,
+    mspPerQuintal: 2320,
+    amount: 143840,
+    status: 'Pending',
+    date: '2026-09-10',
+    centreName: 'Salem Main Procurement Centre #402',
+    district: 'Salem',
+    accountNumber: '•••• 1184',
+    ifsc: 'IOBA0001024',
+    bankName: 'Indian Overseas Bank',
+    utrNumber: '',
+    statutoryDeadline: '12 Sep 2026',
+    discrepancyReason: '',
+  },
+  {
+    id: 'PAY-1015',
+    farmerName: 'Jagjit Singh Dhillon',
+    farmerPhone: '+91 98760 11228',
+    aadhaarMasked: '•••• •••• 9940',
+    tokenNumber: 'TKN-PB-7741',
+    crop: 'Wheat (FAQ Standard)',
+    quantityQuintals: 68.0,
+    mspPerQuintal: 2275,
+    amount: 154700,
+    status: 'Completed',
+    date: '2026-09-07',
+    centreName: 'Ludhiana Central Mandi Yard #12',
+    district: 'Ludhiana',
+    accountNumber: '•••• 6620',
+    ifsc: 'PUNB0054300',
+    bankName: 'Punjab National Bank',
+    utrNumber: 'PFMS20260907007741',
+    statutoryDeadline: '09 Sep 2026',
+    discrepancyReason: '',
   },
 ];
 
@@ -545,22 +771,86 @@ export const adminStorage = {
     return updated.find((o) => o.id === id);
   },
 
-  // Payments
+  // Payments (High Capacity DBT Support)
   getPayments: () => safeGet(STORAGE_KEYS.PAYMENTS, DEFAULT_PAYMENTS),
   setPayments: (payments) => safeSet(STORAGE_KEYS.PAYMENTS, payments),
+  
   markPaymentPaid: (id) => {
     const payments = adminStorage.getPayments();
+    const utr = 'PFMS' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + Math.floor(100000 + Math.random() * 900000);
     const updated = payments.map((p) => {
       if (p.id === id) {
-        return { ...p, status: 'Completed', paidDate: new Date().toISOString().split('T')[0] };
+        return {
+          ...p,
+          status: 'Completed',
+          utrNumber: p.utrNumber || utr,
+          paidDate: new Date().toISOString().split('T')[0],
+          discrepancyReason: '',
+        };
       }
       return p;
     });
     adminStorage.setPayments(updated);
     return updated.find((p) => p.id === id);
   },
-  approvePayment: (id) => {
-    return adminStorage.markPaymentPaid(id);
+
+  bulkApprovePayments: (paymentIds) => {
+    const payments = adminStorage.getPayments();
+    const idSet = new Set(paymentIds);
+    const today = new Date().toISOString().split('T')[0];
+    const prefix = 'PFMS' + today.replace(/-/g, '');
+    let counter = 1000;
+
+    const updated = payments.map((p) => {
+      if (idSet.has(p.id)) {
+        counter += 1;
+        return {
+          ...p,
+          status: 'Completed',
+          utrNumber: p.utrNumber || (prefix + counter),
+          paidDate: today,
+          discrepancyReason: '',
+        };
+      }
+      return p;
+    });
+    adminStorage.setPayments(updated);
+    return updated;
+  },
+
+  retryPayment: (id) => {
+    const payments = adminStorage.getPayments();
+    const updated = payments.map((p) => {
+      if (p.id === id) {
+        return { ...p, status: 'Pending', discrepancyReason: '' };
+      }
+      return p;
+    });
+    adminStorage.setPayments(updated);
+    return updated.find((p) => p.id === id);
+  },
+
+  getPaymentStats: () => {
+    const payments = adminStorage.getPayments();
+    const totalAmount = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const pending = payments.filter((p) => p.status === 'Pending');
+    const inClearing = payments.filter((p) => p.status === 'In Clearing');
+    const completed = payments.filter((p) => p.status === 'Completed');
+    const discrepancy = payments.filter((p) => p.status === 'Discrepancy');
+
+    const pendingAmount = pending.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+    const completedAmount = completed.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+    return {
+      totalCount: payments.length,
+      totalAmount,
+      pendingCount: pending.length,
+      pendingAmount,
+      inClearingCount: inClearing.length,
+      completedCount: completed.length,
+      completedAmount,
+      discrepancyCount: discrepancy.length,
+    };
   },
 
   // Reports
@@ -597,16 +887,12 @@ export const adminStorage = {
     return updated;
   },
 
-  // Dashboard Stats (Exactly 6 stats specified by user)
+  // Dashboard Stats
   getDashboardStats: () => {
     const centres = adminStorage.getCentres();
-    const payments = adminStorage.getPayments();
+    const pStats = adminStorage.getPaymentStats();
     const openCentres = centres.filter((c) => c.status === 'Open').length;
     const closedCentres = centres.filter((c) => c.status === 'Closed').length;
-
-    const pendingTotal = payments
-      .filter((p) => p.status === 'Pending')
-      .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
     return {
       totalCentres: centres.length,
@@ -614,7 +900,8 @@ export const adminStorage = {
       centresClosed: closedCentres,
       todayFarmers: 4820,
       todayProcurement: '18,450 MT',
-      pendingPayments: '₹ ' + pendingTotal.toLocaleString('en-IN'),
+      pendingPayments: '₹ ' + pStats.pendingAmount.toLocaleString('en-IN'),
+      pendingPaymentCount: pStats.pendingCount,
     };
   },
 

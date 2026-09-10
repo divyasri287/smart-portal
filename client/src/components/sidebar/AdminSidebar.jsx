@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -17,16 +17,51 @@ import adminStorage from '../../utils/adminStorage';
 export const AdminSidebar = ({ onCloseMobile }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const profile = adminStorage.getProfile();
+  const [profile, setProfile] = useState(() => adminStorage.getProfile());
+  const [pStats, setPStats] = useState(() => adminStorage.getPaymentStats());
+  const [centres, setCentres] = useState(() => adminStorage.getCentres());
+  const [notifs, setNotifs] = useState(() => adminStorage.getNotifications());
+
+  useEffect(() => {
+    const sync = () => {
+      setProfile(adminStorage.getProfile());
+      setPStats(adminStorage.getPaymentStats());
+      setCentres(adminStorage.getCentres());
+      setNotifs(adminStorage.getNotifications());
+    };
+    sync();
+    const interval = setInterval(sync, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const openCentresCount = centres.filter((c) => c.status === 'Open').length;
 
   const links = [
-    { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/admin/centre-monitoring', label: 'Centre Monitoring', icon: Building2 },
-    { to: '/admin/users', label: 'User Management', icon: Users },
-    { to: '/admin/payments', label: 'Payment Management', icon: CreditCard },
-    { to: '/admin/reports', label: 'Reports', icon: FileSpreadsheet },
-    { to: '/admin/notifications', label: 'Notifications', icon: Bell },
-    { to: '/admin/profile', label: 'Profile', icon: User },
+    { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: null },
+    {
+      to: '/admin/centre-monitoring',
+      label: 'Centre Monitoring',
+      icon: Building2,
+      badge: `${openCentresCount} Open`,
+      badgeColor: 'bg-emerald-100 text-emerald-800',
+    },
+    { to: '/admin/users', label: 'User Management', icon: Users, badge: null },
+    {
+      to: '/admin/payments',
+      label: 'Payment Management',
+      icon: CreditCard,
+      badge: pStats.pendingCount > 0 ? `${pStats.pendingCount} Pending` : null,
+      badgeColor: 'bg-amber-100 text-amber-900 font-bold',
+    },
+    { to: '/admin/reports', label: 'Reports', icon: FileSpreadsheet, badge: null },
+    {
+      to: '/admin/notifications',
+      label: 'Notifications',
+      icon: Bell,
+      badge: notifs.length > 0 ? `${notifs.length}` : null,
+      badgeColor: 'bg-blue-100 text-blue-800',
+    },
+    { to: '/admin/profile', label: 'Profile', icon: User, badge: null },
   ];
 
   const handleLogout = () => {
@@ -66,7 +101,7 @@ export const AdminSidebar = ({ onCloseMobile }) => {
         </div>
       </div>
 
-      {/* ── NAVIGATION LINKS (EXACTLY 7 SPECIFIED ITEMS) ── */}
+      {/* ── NAVIGATION LINKS ── */}
       <nav className="flex-1 p-2.5 space-y-1 overflow-y-auto">
         <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
           Admin Control Menu
@@ -79,14 +114,26 @@ export const AdminSidebar = ({ onCloseMobile }) => {
               to={link.to}
               onClick={onCloseMobile}
               className={({ isActive }) =>
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-150 ' +
+                'flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-150 ' +
                 (isActive
                   ? 'bg-emerald-800 text-white shadow-xs font-bold'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-emerald-900')
               }
             >
-              <Icon className="w-4 h-4 shrink-0" />
-              <span className="truncate">{link.label}</span>
+              <div className="flex items-center gap-3 truncate">
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="truncate">{link.label}</span>
+              </div>
+              {link.badge && (
+                <span
+                  className={
+                    'text-[10px] px-2 py-0.5 rounded-full shrink-0 font-mono ' +
+                    link.badgeColor
+                  }
+                >
+                  {link.badge}
+                </span>
+              )}
             </NavLink>
           );
         })}
