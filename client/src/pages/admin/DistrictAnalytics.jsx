@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { MapPin, Search, BarChart2 } from 'lucide-react';
+import { Search, BarChart2 } from 'lucide-react';
 
 const DISTRICT_DATA = [
   { name: 'Ludhiana', state: 'Punjab', centres: 2, procurement: 4200, todayProcurement: 215, paymentStatus: '100% Cleared' },
@@ -26,18 +26,9 @@ export const DistrictAnalytics = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
       <div className="pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-            <MapPin className="w-3.5 h-3.5" />
-            District Level Analytics
-          </span>
-        </div>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">District Analytics</h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-          District-wise procurement comparison, mandi centres, and payment clearance status
-        </p>
       </div>
 
       {/* ── SEARCH DISTRICT ── */}
@@ -57,7 +48,7 @@ export const DistrictAnalytics = () => {
         </span>
       </div>
 
-      {/* ── ONE SIMPLE COMPARISON BAR CHART ── */}
+      {/* ── COMPARISON BAR CHART ── */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs">
         <div className="flex items-center gap-2 mb-4">
           <BarChart2 className="w-4 h-4 text-green-700" />
@@ -91,11 +82,10 @@ export const DistrictAnalytics = () => {
         </div>
       </div>
 
-      {/* ── SIMPLE DISTRICT RANKING TABLE (EXACT COLUMNS REQUESTED) ── */}
+      {/* ── DISTRICT RANKING TABLE (SUBTITLE REMOVED) ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-slate-100">
-          <h2 className="font-bold text-sm text-slate-900">District Performance Ranking Table</h2>
-          <p className="text-xs text-slate-500 mt-0.5">Ranked by total grain procurement volume</p>
+          <h2 className="font-bold text-sm text-slate-900">District Ranking Table</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">

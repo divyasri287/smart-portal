@@ -29,16 +29,16 @@ export const SidebarLayout = ({ isOpenMobile, onCloseMobile, isDesktopSidebarOpe
 
   return (
     <>
-      {/* Desktop Persistent Sidebar */}
+      {/* Desktop Persistent Sidebar - Independent Scroll */}
       <aside
-        className={`hidden md:block bg-white border-r border-slate-200 shrink-0 transition-all duration-200 ${
+        className={`hidden md:block bg-white border-r border-slate-200 shrink-0 transition-all duration-200 h-full overflow-y-auto ${
           isFarmerRole
             ? isDesktopSidebarOpen
               ? 'fixed left-0 top-16 h-[calc(100vh-4rem)] w-60 overflow-hidden z-30'
               : 'fixed left-0 top-16 h-[calc(100vh-4rem)] w-0 overflow-hidden border-r-0'
             : isDesktopSidebarOpen
-            ? 'relative w-64 min-h-[calc(100vh-4rem)]'
-            : 'relative w-0 min-h-[calc(100vh-4rem)] overflow-hidden border-r-0'
+            ? 'relative w-64 h-full overflow-y-auto'
+            : 'relative w-0 h-full overflow-hidden border-r-0'
         }`}
       >
         <div className={`h-full ${isDesktopSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>

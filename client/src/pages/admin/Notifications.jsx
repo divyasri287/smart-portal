@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Bell,
   Plus,
   Search,
   CheckCircle2,
-  AlertTriangle,
-  FileText,
-  Calendar,
   Trash2,
   Eye,
   X,
   Send,
-  Megaphone,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
@@ -67,7 +62,6 @@ export const AdminNotifications = () => {
     if (viewNotif && viewNotif.id === id) setViewNotif(null);
   };
 
-  // EXACT CATEGORIES SPECIFIED BY USER
   const categories = [
     'All',
     'Government Announcement',
@@ -100,20 +94,9 @@ export const AdminNotifications = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-              <Megaphone className="w-3.5 h-3.5" />
-              Administrative Broadcasts
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Notifications</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Publish announcements, holiday notices, and centre schedule updates
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Notifications</h1>
 
         <button
           type="button"
@@ -164,7 +147,7 @@ export const AdminNotifications = () => {
         </div>
       </div>
 
-      {/* ── NOTIFICATIONS LIST (VIEW NOTIFICATIONS) ── */}
+      {/* ── NOTIFICATIONS LIST ── */}
       <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-xs">

@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  BarChart2,
   Wheat,
   Users,
   CreditCard,
@@ -31,52 +30,18 @@ const BAR_MAX = Math.max(...TOP_DISTRICTS.map((d) => d.procurement));
 const LINE_MAX = Math.max(...MONTHLY_DATA.map((d) => d.value));
 
 export const StateAnalytics = () => {
-  // EXACT 4 SUMMARY CARDS SPECIFIED BY USER
   const summaryCards = [
-    {
-      label: 'Total Procurement',
-      value: '24,680 MT',
-      sub: 'Kharif Season Total',
-      icon: Wheat,
-      color: 'text-amber-700 bg-amber-50 border-amber-200',
-    },
-    {
-      label: 'Total Farmers Served',
-      value: '5,820',
-      sub: 'Unique Beneficiaries',
-      icon: Users,
-      color: 'text-blue-700 bg-blue-50 border-blue-200',
-    },
-    {
-      label: 'Total Payment Released',
-      value: '₹ 56.12 Cr',
-      sub: 'DBT Bank Clearance',
-      icon: CreditCard,
-      color: 'text-green-700 bg-green-50 border-green-200',
-    },
-    {
-      label: 'Active Centres',
-      value: '6 Operational',
-      sub: 'Out of 8 Registered',
-      icon: Building2,
-      color: 'text-purple-700 bg-purple-50 border-purple-200',
-    },
+    { label: 'Total Procurement', value: '24,680 MT', sub: 'Kharif Season Total', icon: Wheat, color: 'text-amber-700 bg-amber-50 border-amber-200' },
+    { label: 'Total Farmers Served', value: '5,820', sub: 'Unique Beneficiaries', icon: Users, color: 'text-blue-700 bg-blue-50 border-blue-200' },
+    { label: 'Total Payment Released', value: '₹ 56.12 Cr', sub: 'DBT Bank Clearance', icon: CreditCard, color: 'text-green-700 bg-green-50 border-green-200' },
+    { label: 'Active Centres', value: '6 Operational', sub: 'Out of 8 Registered', icon: Building2, color: 'text-purple-700 bg-purple-50 border-purple-200' },
   ];
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
       <div className="pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-            <BarChart2 className="w-3.5 h-3.5" />
-            State Level Analytics
-          </span>
-        </div>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">State Analytics</h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-          State-wide procurement volume, farmer participation, and DBT disbursements
-        </p>
       </div>
 
       {/* ── 4 SUMMARY CARDS ── */}
@@ -98,9 +63,9 @@ export const StateAnalytics = () => {
         })}
       </div>
 
-      {/* ── CHARTS ROW: ONE BAR CHART + ONE LINE CHART ── */}
+      {/* ── CHARTS ROW ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* ONE CLEAN BAR CHART (Top Performing Districts) */}
+        {/* ONE CLEAN BAR CHART */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs">
           <div className="flex items-center gap-2 mb-4">
             <Award className="w-4 h-4 text-green-700" />
@@ -134,7 +99,7 @@ export const StateAnalytics = () => {
           </div>
         </div>
 
-        {/* ONE SIMPLE LINE CHART (Monthly Procurement Trend) */}
+        {/* ONE SIMPLE LINE CHART */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs flex flex-col justify-between">
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -143,7 +108,6 @@ export const StateAnalytics = () => {
             </div>
             <div className="relative h-48 pt-2">
               <svg viewBox="0 0 320 160" className="w-full h-full" preserveAspectRatio="none">
-                {/* Horizontal reference lines */}
                 {[0, 1, 2, 3].map((i) => (
                   <line
                     key={i}
@@ -156,8 +120,6 @@ export const StateAnalytics = () => {
                     strokeDasharray="3 3"
                   />
                 ))}
-
-                {/* Line Path */}
                 <polyline
                   points={MONTHLY_DATA.map((d, i) => {
                     const x = 35 + i * (265 / (MONTHLY_DATA.length - 1));
@@ -170,15 +132,13 @@ export const StateAnalytics = () => {
                   strokeLinejoin="round"
                   strokeLinecap="round"
                 />
-
-                {/* Data Points and Labels */}
                 {MONTHLY_DATA.map((d, i) => {
                   const x = 35 + i * (265 / (MONTHLY_DATA.length - 1));
                   const y = 135 - Math.round((d.value / LINE_MAX) * 115);
                   return (
                     <g key={d.month}>
                       <circle cx={x} cy={y} r="4" fill="#166534" stroke="#ffffff" strokeWidth="1.5" />
-                      <text x={x} y="152" textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="500">
+                      <text x={x} y={152} textAnchor="middle" fontSize="10" fill="#64748b" fontWeight="500">
                         {d.month}
                       </text>
                       <text x={x} y={y - 7} textAnchor="middle" fontSize="9" fill="#166534" fontWeight="700">
@@ -190,17 +150,13 @@ export const StateAnalytics = () => {
               </svg>
             </div>
           </div>
-          <p className="text-[10px] text-slate-400 text-center mt-2">
-            Monthly grain volume procured under MSP (Kharif Season 2026)
-          </p>
         </div>
       </div>
 
-      {/* ── ONE SMALL SUMMARY TABLE ── */}
+      {/* ── SUMMARY TABLE (SUBTITLE REMOVED) ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-slate-100">
           <h2 className="font-bold text-sm text-slate-900">District Performance Summary</h2>
-          <p className="text-xs text-slate-500 mt-0.5">Summary of top district procurement numbers</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">

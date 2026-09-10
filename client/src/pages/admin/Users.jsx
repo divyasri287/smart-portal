@@ -5,14 +5,13 @@ import {
   Building2,
   Search,
   Plus,
-  Edit,
   X,
   CheckCircle2,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
 export const UsersPage = () => {
-  const [activeTab, setActiveTab] = useState('officers'); // 'officers' | 'managers'
+  const [activeTab, setActiveTab] = useState('officers');
   const [officers, setOfficers] = useState(() => adminStorage.getOfficers());
   const [managers, setManagers] = useState(() => adminStorage.getManagers());
   const [search, setSearch] = useState('');
@@ -110,20 +109,9 @@ export const UsersPage = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-              <Users className="w-3.5 h-3.5" />
-              Staff Administration
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">User Management</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Administer Procurement Officers and Centre Managers across operational mandis
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">User Management</h1>
 
         <button
           type="button"
@@ -145,7 +133,6 @@ export const UsersPage = () => {
 
       {/* ── TABS & SEARCH ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
-        {/* EXACT 2 TABS REQUESTED: Officers and Centre Managers */}
         <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg">
           <button
             type="button"
@@ -174,7 +161,6 @@ export const UsersPage = () => {
           </button>
         </div>
 
-        {/* Search */}
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -213,15 +199,9 @@ export const UsersPage = () => {
                     const isActive = o.status === 'Active';
                     return (
                       <tr key={o.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-slate-900">
-                          {o.name}
-                        </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
-                          {o.employeeId}
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-700 font-medium">
-                          {o.assignedCentre}
-                        </td>
+                        <td className="py-3.5 px-4 font-bold text-slate-900">{o.name}</td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-slate-700">{o.employeeId}</td>
+                        <td className="py-3.5 px-4 text-slate-700 font-medium">{o.assignedCentre}</td>
                         <td className="py-3.5 px-4">
                           <span
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
@@ -230,11 +210,7 @@ export const UsersPage = () => {
                                 : 'bg-rose-50 text-rose-700 border-rose-200'
                             }`}
                           >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                isActive ? 'bg-green-600' : 'bg-rose-600'
-                              }`}
-                            />
+                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-600' : 'bg-rose-600'}`} />
                             <span>{o.status}</span>
                           </span>
                         </td>
@@ -296,15 +272,9 @@ export const UsersPage = () => {
                     const isActive = m.status === 'Active';
                     return (
                       <tr key={m.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-4 font-bold text-slate-900">
-                          {m.name}
-                        </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
-                          {m.employeeId}
-                        </td>
-                        <td className="py-3.5 px-4 text-slate-700 font-medium">
-                          {m.assignedCentre}
-                        </td>
+                        <td className="py-3.5 px-4 font-bold text-slate-900">{m.name}</td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-slate-700">{m.employeeId}</td>
+                        <td className="py-3.5 px-4 text-slate-700 font-medium">{m.assignedCentre}</td>
                         <td className="py-3.5 px-4">
                           <span
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
@@ -313,11 +283,7 @@ export const UsersPage = () => {
                                 : 'bg-rose-50 text-rose-700 border-rose-200'
                             }`}
                           >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                isActive ? 'bg-green-600' : 'bg-rose-600'
-                              }`}
-                            />
+                            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-600' : 'bg-rose-600'}`} />
                             <span>{m.status}</span>
                           </span>
                         </td>

@@ -3,21 +3,18 @@ import {
   Building2,
   Search,
   CheckCircle2,
-  XCircle,
   Eye,
   Power,
   X,
   Phone,
   Mail,
-  Clock,
-  Wheat,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
 export const CentreMonitoring = () => {
   const [centres, setCentres] = useState(() => adminStorage.getCentres());
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All'); // 'All' | 'Open' | 'Closed'
+  const [statusFilter, setStatusFilter] = useState('All');
   const [selectedCentre, setSelectedCentre] = useState(null);
   const [notice, setNotice] = useState(null);
 
@@ -55,22 +52,9 @@ export const CentreMonitoring = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-              <Building2 className="w-3.5 h-3.5" />
-              Depot Operations
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Procurement Centre Monitoring
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Real-time mandi centre status, queue monitoring, and operational gate control
-          </p>
-        </div>
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
+      <div className="pb-4 border-b border-slate-200">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Centre Monitoring</h1>
       </div>
 
       {/* ── TOAST NOTICE ── */}
@@ -140,7 +124,7 @@ export const CentreMonitoring = () => {
         </div>
       </div>
 
-      {/* ── CENTRES TABLE (EXACT COLUMNS & ACTIONS REQUESTED) ── */}
+      {/* ── CENTRES TABLE ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">

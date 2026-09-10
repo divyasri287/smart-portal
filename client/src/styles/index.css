@@ -48,56 +48,41 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* =========================================================
-   PROCUREMENT OFFICER MODULE ISOLATED STYLING
-   ========================================================= */
-.officer-portal-root {
+/* ENFORCE DEFAULT ARROW CURSOR EVERYWHERE - PREVENT TEXT/CARET CURSOR ON CLICK */
+*, *::before, *::after {
   cursor: default !important;
   user-select: none !important;
   -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  caret-color: transparent !important;
 }
 
-.officer-portal-root *:not(input):not(textarea) {
-  caret-color: transparent !important;
+/* INTERACTIVE BUTTONS & LINKS - POINTER HAND */
+button,
+a,
+select,
+[role="button"],
+.cursor-pointer,
+input[type="checkbox"],
+input[type="radio"],
+label[for] {
+  cursor: pointer !important;
   user-select: none !important;
   -webkit-user-select: none !important;
 }
 
-.officer-portal-root button,
-.officer-portal-root a,
-.officer-portal-root select,
-.officer-portal-root [role="button"] {
-  cursor: pointer !important;
-}
-
-.officer-portal-root input,
-.officer-portal-root textarea {
+/* EDITABLE TEXT INPUTS - ONLY THESE ALLOW TYPING CURSOR */
+input[type="text"],
+input[type="tel"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="search"],
+textarea {
   cursor: text !important;
   user-select: text !important;
   -webkit-user-select: text !important;
-  caret-color: auto !important;
+  caret-color: #0f172a !important;
 }
-
-/* Sleek custom scrollbars for independent officer panels */
-.officer-portal-root aside::-webkit-scrollbar,
-.officer-portal-root main::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.officer-portal-root aside::-webkit-scrollbar-track,
-.officer-portal-root main::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.officer-portal-root aside::-webkit-scrollbar-thumb,
-.officer-portal-root main::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-}
-
-.officer-portal-root aside::-webkit-scrollbar-thumb:hover,
-.officer-portal-root main::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-

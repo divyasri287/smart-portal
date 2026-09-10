@@ -54,20 +54,9 @@ Director General of Procurement
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              Audit Documentation
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Procurement Reports</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Official government procurement audits, weighbridge reports, and settlement logs
-          </p>
-        </div>
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
+      <div className="pb-4 border-b border-slate-200">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Reports</h1>
       </div>
 
       {/* ── TOAST NOTICE ── */}
@@ -78,11 +67,8 @@ Director General of Procurement
         </div>
       )}
 
-      {/* ── 3 CORE REPORT CARDS (EXACTLY AS SPECIFIED: Daily, Weekly, Monthly) ── */}
+      {/* ── 3 CORE REPORT CARDS ── */}
       <div>
-        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
-          Available Procurement Reports
-        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {reports.map((report) => (
             <div
@@ -130,7 +116,6 @@ Director General of Procurement
                 )}
               </div>
 
-              {/* EXACT 2 BUTTONS: View & Download PDF */}
               <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 mt-4">
                 <button
                   type="button"

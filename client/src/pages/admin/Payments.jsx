@@ -6,15 +6,13 @@ import {
   Eye,
   Check,
   X,
-  Landmark,
-  Clock,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
 export const AdminPayments = () => {
   const [payments, setPayments] = useState(() => adminStorage.getPayments());
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All'); // 'All' | 'Pending' | 'Completed'
+  const [statusFilter, setStatusFilter] = useState('All');
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [notice, setNotice] = useState(null);
 
@@ -57,20 +55,9 @@ export const AdminPayments = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-              <CreditCard className="w-3.5 h-3.5" />
-              Direct Benefit Transfer
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Payment Management</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Clear farmer MSP procurement payments directly to verified bank accounts
-          </p>
-        </div>
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
+      <div className="pb-4 border-b border-slate-200">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Payment Management</h1>
       </div>
 
       {/* ── TOAST NOTICE ── */}
@@ -123,7 +110,6 @@ export const AdminPayments = () => {
           />
         </div>
 
-        {/* Status Filter: Pending and Completed */}
         <div className="flex items-center gap-1.5 self-start sm:self-auto">
           <span className="text-xs font-semibold text-slate-500 mr-1">Status:</span>
           {['All', 'Pending', 'Completed'].map((st) => (
@@ -143,7 +129,7 @@ export const AdminPayments = () => {
         </div>
       </div>
 
-      {/* ── PAYMENTS TABLE (EXACT COLUMNS & ACTIONS REQUESTED) ── */}
+      {/* ── PAYMENTS TABLE ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
@@ -171,15 +157,9 @@ export const AdminPayments = () => {
                   const isPending = p.status === 'Pending';
                   return (
                     <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3.5 px-4 font-bold text-slate-900">
-                        {p.farmerName}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
-                        {p.tokenNumber}
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-800">
-                        {p.crop}
-                      </td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900">{p.farmerName}</td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-700">{p.tokenNumber}</td>
+                      <td className="py-3.5 px-4 text-slate-800">{p.crop}</td>
                       <td className="py-3.5 px-4 font-mono font-bold text-slate-900 text-sm">
                         ₹ {p.amount.toLocaleString('en-IN')}
                       </td>
@@ -199,9 +179,7 @@ export const AdminPayments = () => {
                           <span>{isCompleted ? 'Paid' : p.status}</span>
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-slate-500">
-                        {p.date}
-                      </td>
+                      <td className="py-3.5 px-4 font-mono text-slate-500">{p.date}</td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="inline-flex items-center gap-1.5 justify-end">
                           <button

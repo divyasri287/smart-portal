@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  User,
   Phone,
   Mail,
-  Building2,
   Edit,
   KeyRound,
   CheckCircle2,
   X,
   Save,
-  ShieldCheck,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
@@ -69,22 +66,10 @@ export const AdminProfile = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── HEADER ── */}
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Government Admin Account
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Profile</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Official government credentials and verified contact information
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Profile</h1>
 
-        {/* EXACT 2 BUTTONS SPECIFIED: Edit Profile & Change Password */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
             type="button"
@@ -122,7 +107,7 @@ export const AdminProfile = () => {
         </div>
       )}
 
-      {/* ── EXACT PROFILE DETAILS SPECIFIED: Admin Name, Department, Email, Mobile Number ── */}
+      {/* ── PROFILE DETAILS ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs p-6 space-y-5 max-w-2xl">
         <div className="flex items-center gap-4 pb-5 border-b border-slate-100">
           <div className="w-14 h-14 rounded-full bg-green-800 text-white flex items-center justify-center font-bold text-xl shadow-xs">
@@ -131,7 +116,6 @@ export const AdminProfile = () => {
           <div>
             <h2 className="text-lg font-bold text-slate-900">{profile.adminName}</h2>
             <p className="text-xs text-green-700 font-semibold mt-0.5">National Level Government Administrator</p>
-            <p className="text-xs text-slate-400">SIH 2026 Procurement Portal</p>
           </div>
         </div>
 

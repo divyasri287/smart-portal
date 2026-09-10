@@ -12,20 +12,17 @@ import {
   FileSpreadsheet,
   ArrowRight,
   Clock,
-  ChevronRight,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
 export const AdminDashboard = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(() => adminStorage.getDashboardStats());
-  const [profile, setProfile] = useState(() => adminStorage.getProfile());
   const [pStats, setPStats] = useState(() => adminStorage.getPaymentStats());
 
   useEffect(() => {
     const sync = () => {
       setStats(adminStorage.getDashboardStats());
-      setProfile(adminStorage.getProfile());
       setPStats(adminStorage.getPaymentStats());
     };
     sync();
@@ -33,120 +30,28 @@ export const AdminDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // EXACT 8 STATS REQUESTED BY USER
   const statCards = [
-    {
-      title: 'Total Centres',
-      value: stats.totalCentres,
-      subtitle: 'Registered Mandis',
-      icon: Building2,
-      color: 'green',
-    },
-    {
-      title: 'Centres Open',
-      value: stats.centresOpen,
-      subtitle: 'Accepting Grain',
-      icon: CheckCircle2,
-      color: 'emerald',
-    },
-    {
-      title: 'Centres Closed',
-      value: stats.centresClosed,
-      subtitle: 'Maintenance / Standby',
-      icon: XCircle,
-      color: 'rose',
-    },
-    {
-      title: "Today's Procurement",
-      value: stats.todayProcurement || '18,450 MT',
-      subtitle: 'Weighbridge Recorded',
-      icon: Wheat,
-      color: 'amber',
-    },
-    {
-      title: 'Total Registered Farmers',
-      value: '5,820',
-      subtitle: 'Aadhaar Verified',
-      icon: Users,
-      color: 'blue',
-    },
-    {
-      title: 'Pending Payments',
-      value: '₹ ' + pStats.pendingAmount.toLocaleString('en-IN'),
-      subtitle: `${pStats.pendingCount} Farmers Awaiting`,
-      icon: CreditCard,
-      color: 'amber',
-    },
-    {
-      title: 'Active Officers',
-      value: stats.activeOfficers || 8,
-      subtitle: 'On Yard Duty',
-      icon: ShieldCheck,
-      color: 'indigo',
-    },
-    {
-      title: 'Active Managers',
-      value: stats.activeManagers || 8,
-      subtitle: 'Depot Chiefs',
-      icon: UserCheck,
-      color: 'violet',
-    },
+    { title: 'Total Centres', value: stats.totalCentres, subtitle: 'Registered Mandis', icon: Building2, color: 'green' },
+    { title: 'Centres Open', value: stats.centresOpen, subtitle: 'Accepting Grain', icon: CheckCircle2, color: 'emerald' },
+    { title: 'Centres Closed', value: stats.centresClosed, subtitle: 'Standby / Off-shift', icon: XCircle, color: 'rose' },
+    { title: "Today's Procurement", value: stats.todayProcurement || '18,450 MT', subtitle: 'Weighbridge Recorded', icon: Wheat, color: 'amber' },
+    { title: 'Total Registered Farmers', value: '5,820', subtitle: 'Aadhaar Verified', icon: Users, color: 'blue' },
+    { title: 'Pending Payments', value: '₹ ' + pStats.pendingAmount.toLocaleString('en-IN'), subtitle: `${pStats.pendingCount} Farmers Awaiting`, icon: CreditCard, color: 'amber' },
+    { title: 'Active Officers', value: stats.activeOfficers || 8, subtitle: 'On Yard Duty', icon: ShieldCheck, color: 'indigo' },
+    { title: 'Active Managers', value: stats.activeManagers || 8, subtitle: 'Depot Chiefs', icon: UserCheck, color: 'violet' },
   ];
 
-  // EXACT 4 QUICK ACTIONS REQUESTED BY USER
   const quickActions = [
-    {
-      title: 'View Centres',
-      desc: 'Monitor status and open/close mandi gates',
-      icon: Building2,
-      link: '/admin/centre-monitoring',
-    },
-    {
-      title: 'Manage Users',
-      desc: 'Administer officers and centre managers',
-      icon: Users,
-      link: '/admin/users',
-    },
-    {
-      title: 'View Payments',
-      desc: 'Approve and clear pending DBT transactions',
-      icon: CreditCard,
-      link: '/admin/payments',
-    },
-    {
-      title: 'Reports',
-      desc: 'Download certified daily and monthly audit files',
-      icon: FileSpreadsheet,
-      link: '/admin/reports',
-    },
+    { title: 'View Centres', desc: 'Monitor status and open/close mandi gates', icon: Building2, link: '/admin/centre-monitoring' },
+    { title: 'Manage Users', desc: 'Administer officers and centre managers', icon: Users, link: '/admin/users' },
+    { title: 'View Payments', desc: 'Approve and clear pending DBT transactions', icon: CreditCard, link: '/admin/payments' },
+    { title: 'Reports', desc: 'Download certified daily and monthly audit files', icon: FileSpreadsheet, link: '/admin/reports' },
   ];
 
-  // EXACT 3 RECENT ACTIVITIES REQUESTED BY USER
   const recentActivities = [
-    {
-      id: 1,
-      title: 'Recently Approved Payment',
-      desc: 'Payment of ₹ 1,11,360 to S. Arumugam (Token TKN-TN-8843) marked as completed.',
-      time: '12 mins ago',
-      icon: CreditCard,
-      iconColor: 'text-green-700 bg-green-50 border-green-200',
-    },
-    {
-      id: 2,
-      title: 'Newly Added Officer',
-      desc: 'Officer INS-TN-5501 (P. Selvakumar) assigned to Salem Main Procurement Centre.',
-      time: '45 mins ago',
-      icon: ShieldCheck,
-      iconColor: 'text-blue-700 bg-blue-50 border-blue-200',
-    },
-    {
-      id: 3,
-      title: 'Recently Opened Centre',
-      desc: 'Thanjavur Direct Purchase Centre marked Open for farmer slot intake.',
-      time: '2 hours ago',
-      icon: Building2,
-      iconColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
-    },
+    { id: 1, title: 'Recently Approved Payment', desc: 'Payment of ₹ 1,11,360 to S. Arumugam (Token TKN-TN-8843) marked as completed.', time: '12 mins ago', icon: CreditCard, iconColor: 'text-green-700 bg-green-50 border-green-200' },
+    { id: 2, title: 'Newly Added Officer', desc: 'Officer INS-TN-5501 (P. Selvakumar) assigned to Salem Main Procurement Centre.', time: '45 mins ago', icon: ShieldCheck, iconColor: 'text-blue-700 bg-blue-50 border-blue-200' },
+    { id: 3, title: 'Recently Opened Centre', desc: 'Thanjavur Direct Purchase Centre marked Open for farmer slot intake.', time: '2 hours ago', icon: Building2, iconColor: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
   ];
 
   const iconStyles = {
@@ -161,22 +66,9 @@ export const AdminDashboard = () => {
 
   return (
     <div className="space-y-6 pb-12 font-sans select-none">
-      {/* ── WORKSTATION HEADER (MATCHES OFFICER MODULE) ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-green-700" />
-              Government Admin Directorate
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Procurement Overview Dashboard
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            {profile.department} · {profile.adminName}
-          </p>
-        </div>
+      {/* ── HEADER (SUBTITLE REMOVED) ── */}
+      <div className="pb-4 border-b border-slate-200">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
       </div>
 
       {/* ── 8 CLEAN SUMMARY STATS CARDS ── */}
@@ -198,9 +90,7 @@ export const AdminDashboard = () => {
                     <Icon className="w-4 h-4" />
                   </div>
                 </div>
-                <p className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
-                  {c.value}
-                </p>
+                <p className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">{c.value}</p>
                 <p className="text-[11px] text-slate-400 mt-1 truncate">{c.subtitle}</p>
               </div>
             );
@@ -240,11 +130,10 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* ── RECENT ACTIVITIES (3 EXACT ITEMS) ── */}
+      {/* ── RECENT ACTIVITIES (SUBTITLE REMOVED) ── */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-slate-100">
-          <h2 className="font-bold text-sm text-slate-900">Recent Operational Activities</h2>
-          <p className="text-xs text-slate-500 mt-0.5">Live record of portal actions and status updates</p>
+          <h2 className="font-bold text-sm text-slate-900">Recent Activities</h2>
         </div>
         <div className="divide-y divide-slate-100">
           {recentActivities.map((act) => {
