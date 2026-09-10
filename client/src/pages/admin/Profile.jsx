@@ -1,198 +1,394 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Save, UserCheck, ShieldCheck, ArrowRight, Building2, Landmark, User } from 'lucide-react';
-import { adminProfile } from '../../data/adminData';
+import React, { useState, useEffect } from 'react';
+import {
+  User,
+  Building2,
+  Phone,
+  Mail,
+  ShieldCheck,
+  Edit,
+  KeyRound,
+  CheckCircle2,
+  X,
+  Save,
+  MapPin,
+  Calendar,
+} from 'lucide-react';
+import adminStorage from '../../utils/adminStorage';
 
-export const Profile = () => {
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState(adminProfile);
-  const [isEditing, setIsEditing] = useState(false);
-  const [saveNotification, setSaveNotification] = useState(false);
+export const AdminProfile = () => {
+  const [profile, setProfile] = useState(() => adminStorage.getProfile());
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [notice, setNotice] = useState(null);
 
-  const handleSave = (e) => {
+  const [editForm, setEditForm] = useState({
+    adminName: '',
+    department: '',
+    email: '',
+    mobileNumber: '',
+  });
+
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  useEffect(() => {
+    const p = adminStorage.getProfile();
+    setProfile(p);
+    setEditForm({
+      adminName: p.adminName,
+      department: p.department,
+      email: p.email,
+      mobileNumber: p.mobileNumber,
+    });
+  }, []);
+
+  const showToast = (msg) => {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
+  };
+
+  const handleSaveProfile = (e) => {
     e.preventDefault();
-    setIsEditing(false);
-    setSaveNotification(true);
-    setTimeout(() => setSaveNotification(false), 3500);
+    const updated = adminStorage.updateProfile(editForm);
+    setProfile(updated);
+    showToast('Administrator profile updated successfully.');
+    setShowEditModal(false);
+  };
+
+  const handleChangePassword = (e) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      alert('New password and confirmation do not match!');
+      return;
+    }
+    showToast('Security password changed successfully.');
+    setPasswordForm({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setShowPasswordModal(false);
   };
 
   return (
-    <div className="space-y-7">
-      {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-[#E5E7EB]">
+    <div className="space-y-6 select-none cursor-default font-sans pb-8">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
-            <button onClick={() => navigate('/admin/users')} className="hover:text-[#166534]">
-              Users
-            </button>
-            <span>/</span>
-            <span className="text-[#166534] font-bold">Admin Profile</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+              Administrative Credentials
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-[#111827] tracking-tight">Government Admin Profile & Governance Credentials</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Official government officer profile, contact information, and state authorization parameters
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Administrator Profile
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Official government directorate identity, verified contact channels, and system security parameters
           </p>
         </div>
 
-        <button
-          onClick={() => navigate('/admin/dashboard')}
-          className="shrink-0 flex items-center gap-2 bg-[#166534] hover:bg-[#14532d] text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
-        >
-          Control Dashboard <ArrowRight className="w-4 h-4" />
-        </button>
+        {/* Buttons: Edit Profile & Change Password */}
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => {
+              setEditForm({
+                adminName: profile.adminName,
+                department: profile.department,
+                email: profile.email,
+                mobileNumber: profile.mobileNumber,
+              });
+              setShowEditModal(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer"
+          >
+            <Edit className="w-3.5 h-3.5" />
+            <span>Edit Profile</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowPasswordModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-300 transition-colors shadow-2xs cursor-pointer"
+          >
+            <KeyRound className="w-3.5 h-3.5 text-slate-500" />
+            <span>Change Password</span>
+          </button>
+        </div>
       </div>
 
-      {/* Save Notification Toast */}
-      {saveNotification && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-[#166534] flex items-center gap-3 text-sm font-semibold animate-fadeIn shadow-2xs">
-          <CheckCircle2 className="w-5 h-5 shrink-0" />
-          <span>Profile information updated successfully! Changes saved to state directory.</span>
+      {/* ── TOAST NOTICE ── */}
+      {notice && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-3 text-xs font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <span>{notice}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card Summary */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 text-center space-y-4">
-            <div className="w-24 h-24 mx-auto rounded-full bg-[#166534] text-white flex items-center justify-center text-3xl font-bold font-mono shadow-md border-4 border-[#F8FAFC]">
-              GA
-            </div>
-            <div>
-              <h2 className="font-bold text-xl text-[#111827]">{profile.name}</h2>
-              <p className="text-sm font-semibold text-[#15803D] mt-0.5">{profile.role}</p>
-              <p className="text-xs text-slate-500 font-medium mt-1">{profile.department}</p>
-            </div>
+      {/* ── TOP STATS (MAX 4 CARDS) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-slate-500">Cadre & Service</p>
+          <p className="text-lg font-bold text-slate-900 mt-1 font-mono">{profile.cadre}</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">Indian Administrative Service</p>
+        </div>
 
-            <div className="pt-4 border-t border-[#E5E7EB] text-xs space-y-2.5 text-left font-mono">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-sans">Role Privilege:</span>
-                <span className="font-bold text-[#166534] flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> {profile.role}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-sans">Total Managed:</span>
-                <span className="font-bold text-[#111827]">{profile.totalManagedCentres} Centres</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500 font-sans">Authorized Budget:</span>
-                <span className="font-bold text-[#15803D]">{profile.authorizedBudget}</span>
-              </div>
-            </div>
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-slate-500">Security Clearance</p>
+          <p className="text-lg font-bold text-emerald-800 mt-1 font-mono">{profile.clearance}</p>
+          <p className="text-[11px] text-emerald-600 mt-0.5">Full Central Authorization</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-slate-500">Centres Monitored</p>
+          <p className="text-lg font-bold text-slate-900 mt-1 font-mono">250 Mandis</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">36 Mandi Districts</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-slate-500">Authentication</p>
+          <p className="text-lg font-bold text-slate-900 mt-1 font-mono">OTP + Security Token</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">Govt SSO Verified</p>
+        </div>
+      </div>
+
+      {/* ── PROFILE INFORMATION CARD ── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-6 sm:p-7 space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pb-6 border-b border-slate-100">
+          <div className="w-16 h-16 rounded-full bg-emerald-800 text-white flex items-center justify-center text-2xl font-bold font-mono shadow-md border-2 border-emerald-200">
+            SV
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">{profile.adminName}</h2>
+            <p className="text-xs font-semibold text-emerald-700 mt-0.5">{profile.designation}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{profile.department}</p>
           </div>
         </div>
 
-        {/* Profile Information Form */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-[#E5E7EB] pb-4">
-              <div>
-                <h3 className="font-bold text-lg text-[#111827]">Government Officer Information</h3>
-                <p className="text-xs text-slate-500 font-medium mt-0.5">
-                  Update officer details, official email, phone, role, and department designation
-                </p>
-              </div>
+        {/* Details Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Admin Name
+            </p>
+            <p className="text-sm font-bold text-slate-900">{profile.adminName}</p>
+            <p className="text-[11px] text-slate-500">{profile.cadre}</p>
+          </div>
 
-              {!isEditing ? (
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(true)}
-                  className="bg-white hover:bg-[#166534]/5 text-[#166534] border border-[#166534]/30 font-semibold rounded-xl px-4 py-2 text-sm transition-colors shadow-2xs"
-                >
-                  Edit Profile
-                </button>
-              ) : (
-                <span className="text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full">
-                  Editing Mode Active
-                </span>
-              )}
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Department
+            </p>
+            <p className="text-sm font-bold text-slate-900">{profile.department}</p>
+            <p className="text-[11px] text-slate-500">Government of India</p>
+          </div>
+
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Official Email
+            </p>
+            <div className="flex items-center gap-2 text-slate-900 font-medium">
+              <Mail className="w-4 h-4 text-emerald-700" />
+              <span className="text-sm">{profile.email}</span>
             </div>
+            <p className="text-[11px] text-slate-400">NIC Official Mail Gateway</p>
+          </div>
 
-            <form onSubmit={handleSave} className="space-y-5 text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold text-[#111827] mb-1">Official Name</label>
-                  <input
-                    type="text"
-                    disabled={!isEditing}
-                    value={profile.name}
-                    onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] disabled:bg-[#F8FAFC] disabled:text-slate-600 focus:ring-2 focus:ring-[#15803D] focus:outline-none"
-                  />
-                </div>
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Mobile Number
+            </p>
+            <div className="flex items-center gap-2 text-slate-900 font-mono font-medium">
+              <Phone className="w-4 h-4 text-emerald-700" />
+              <span className="text-sm">{profile.mobileNumber}</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Aadhaar Linked Official Contact</p>
+          </div>
 
-                <div>
-                  <label className="block font-semibold text-[#111827] mb-1">Official Email</label>
-                  <input
-                    type="email"
-                    disabled={!isEditing}
-                    value={profile.email}
-                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] disabled:bg-[#F8FAFC] disabled:text-slate-600 focus:ring-2 focus:ring-[#15803D] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-semibold text-[#111827] mb-1">Contact Phone</label>
-                  <input
-                    type="text"
-                    disabled={!isEditing}
-                    value={profile.phone}
-                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] disabled:bg-[#F8FAFC] disabled:text-slate-600 focus:ring-2 focus:ring-[#15803D] focus:outline-none font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-[#111827] mb-1">Official Role</label>
-                  <input
-                    type="text"
-                    disabled={!isEditing}
-                    value={profile.role}
-                    onChange={(e) => setProfile({ ...profile, role: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] disabled:bg-[#F8FAFC] disabled:text-slate-600 focus:ring-2 focus:ring-[#15803D] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-[#111827] mb-1">Government Department</label>
-                <input
-                  type="text"
-                  disabled={!isEditing}
-                  value={profile.department}
-                  onChange={(e) => setProfile({ ...profile, department: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] disabled:bg-[#F8FAFC] disabled:text-slate-600 focus:ring-2 focus:ring-[#15803D] focus:outline-none"
-                />
-              </div>
-
-              {isEditing && (
-                <div className="flex justify-end gap-3 pt-4 border-t border-[#E5E7EB]">
-                  <button
-                    type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="bg-white hover:bg-slate-50 text-[#15803D] border border-[#15803D] font-semibold rounded-xl px-4 py-2.5 text-sm transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#166534] hover:bg-[#14532d] text-white font-semibold rounded-xl px-5 py-2.5 text-sm shadow-xs flex items-center gap-2 transition-colors"
-                  >
-                    <Save className="w-4 h-4" />
-                    Save Profile
-                  </button>
-                </div>
-              )}
-            </form>
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1 md:col-span-2">
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Headquarters Office Address
+            </p>
+            <div className="flex items-center gap-2 text-slate-900">
+              <MapPin className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span className="text-sm font-medium">{profile.office}</span>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* ── EDIT PROFILE MODAL ── */}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-emerald-900 text-white">
+              <div className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-emerald-300" />
+                <h3 className="font-bold text-base">Edit Administrator Profile</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveProfile} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Admin Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.adminName}
+                  onChange={(e) => setEditForm({ ...editForm, adminName: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Department</label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.department}
+                  onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Official Email</label>
+                <input
+                  type="email"
+                  required
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Mobile Number</label>
+                <input
+                  type="tel"
+                  required
+                  value={editForm.mobileNumber}
+                  onChange={(e) => setEditForm({ ...editForm, mobileNumber: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold cursor-pointer hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <Save className="w-3.5 h-3.5" />
+                  <span>Save Profile</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── CHANGE PASSWORD MODAL ── */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-emerald-900 text-white">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-emerald-300" />
+                <h3 className="font-bold text-base">Change Access Password</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPasswordModal(false)}
+                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleChangePassword} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Current Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) =>
+                    setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Minimum 8 characters"
+                  value={passwordForm.newPassword}
+                  onChange={(e) =>
+                    setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Confirm New Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Re-enter new password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordModal(false)}
+                  className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold cursor-pointer hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold cursor-pointer inline-flex items-center gap-1.5"
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Update Password</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Profile;
-
+export default AdminProfile;

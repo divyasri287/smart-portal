@@ -1,309 +1,722 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Users as UsersIcon, UserCheck, ShieldCheck, Search, Filter, Plus, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
-import Modal from '../../components/dialogs/Modal';
-import { usersData } from '../../data/adminData';
+import React, { useState, useEffect } from 'react';
+import {
+  Users,
+  ShieldCheck,
+  Building2,
+  Search,
+  Plus,
+  Eye,
+  Edit,
+  Power,
+  X,
+  CheckCircle2,
+  Phone,
+  Mail,
+  Calendar,
+  AlertTriangle,
+} from 'lucide-react';
+import adminStorage from '../../utils/adminStorage';
 
-export const Users = () => {
-  const navigate = useNavigate();
-  const [usersList, setUsersList] = useState(usersData);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('All');
-  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-  const [newUser, setNewUser] = useState({ user: '', name: '', role: 'District', department: '', email: '', phone: '' });
+export const UsersPage = () => {
+  const [activeTab, setActiveTab] = useState('officers'); // 'officers' | 'managers'
+  const [officers, setOfficers] = useState(() => adminStorage.getOfficers());
+  const [managers, setManagers] = useState(() => adminStorage.getManagers());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [centres, setCentres] = useState(() => adminStorage.getCentres());
 
-  const roles = ['All', 'District', 'Centre', 'Admin'];
+  // Modals state
+  const [viewUser, setViewUser] = useState(null);
+  const [editUser, setEditUser] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [notice, setNotice] = useState(null);
 
-  const filteredUsers = usersList.filter((u) => {
-    const matchesSearch =
-      u.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.role.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'All' || u.role === roleFilter;
-    return matchesSearch && matchesRole;
+  // New user form state
+  const [newUserForm, setNewUserForm] = useState({
+    name: '',
+    employeeId: '',
+    assignedCentre: '',
+    phone: '',
+    email: '',
+    designation: '',
   });
 
-  const toggleUserStatus = (userId) => {
-    setUsersList((prev) =>
-      prev.map((u) => (u.userId === userId ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u))
-    );
+  useEffect(() => {
+    setOfficers(adminStorage.getOfficers());
+    setManagers(adminStorage.getManagers());
+    setCentres(adminStorage.getCentres());
+  }, []);
+
+  const showToast = (msg) => {
+    setNotice(msg);
+    setTimeout(() => setNotice(null), 3000);
   };
 
-  const handleAddUserSubmit = (e) => {
+  const handleToggleOfficer = (off) => {
+    const updated = adminStorage.toggleOfficerStatus(off.id);
+    setOfficers(adminStorage.getOfficers());
+    showToast(`Officer ${off.name} is now ${updated.status}.`);
+  };
+
+  const handleToggleManager = (mgr) => {
+    const updated = adminStorage.toggleManagerStatus(mgr.id);
+    setManagers(adminStorage.getManagers());
+    showToast(`Manager ${mgr.name} is now ${updated.status}.`);
+  };
+
+  const handleSaveEdit = (e) => {
     e.preventDefault();
-    if (!newUser.name) return;
-
-    const count = usersList.length + 1;
-    const created = {
-      userId: `USR-0${count}`,
-      user: `User 0${count}`,
-      name: newUser.name,
-      role: newUser.role,
-      department: newUser.department || 'Government Directorate',
-      location: 'Regional Office',
-      email: newUser.email || `user0${count}@gov.in`,
-      phone: newUser.phone || '+91 98000 00000',
-      status: 'Active',
-      lastActive: 'Just now'
-    };
-
-    setUsersList([created, ...usersList]);
-    setIsAddUserModalOpen(false);
-    setNewUser({ user: '', name: '', role: 'District', department: '', email: '', phone: '' });
+    if (!editUser) return;
+    if (activeTab === 'officers') {
+      adminStorage.updateOfficer(editUser.id, editUser);
+      setOfficers(adminStorage.getOfficers());
+    } else {
+      adminStorage.updateManager(editUser.id, editUser);
+      setManagers(adminStorage.getManagers());
+    }
+    showToast(`Updated details for ${editUser.name} successfully.`);
+    setEditUser(null);
   };
 
-  const activeCount = usersList.filter((u) => u.status === 'Active').length;
+  const handleCreateUser = (e) => {
+    e.preventDefault();
+    if (!newUserForm.name || !newUserForm.employeeId) return;
+
+    if (activeTab === 'officers') {
+      adminStorage.addOfficer({
+        ...newUserForm,
+        status: 'Active',
+        joiningDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      });
+      setOfficers(adminStorage.getOfficers());
+      showToast(`Officer ${newUserForm.name} added successfully.`);
+    } else {
+      adminStorage.addManager({
+        ...newUserForm,
+        status: 'Active',
+        joiningDate: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      });
+      setManagers(adminStorage.getManagers());
+      showToast(`Manager ${newUserForm.name} added successfully.`);
+    }
+
+    setNewUserForm({
+      name: '',
+      employeeId: '',
+      assignedCentre: centres[0]?.name || '',
+      phone: '',
+      email: '',
+      designation: '',
+    });
+    setShowAddModal(false);
+  };
+
+  // Filter lists
+  const filteredOfficers = officers.filter(
+    (o) =>
+      o.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.assignedCentre.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredManagers = managers.filter(
+    (m) =>
+      m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      m.assignedCentre.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const activeOfficersCount = officers.filter((o) => o.status === 'Active').length;
+  const activeManagersCount = managers.filter((m) => m.status === 'Active').length;
+  const totalStaff = officers.length + managers.length;
+  const disabledCount =
+    officers.filter((o) => o.status === 'Disabled').length +
+    managers.filter((m) => m.status === 'Disabled').length;
 
   return (
-    <div className="space-y-7">
-      {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-[#E5E7EB]">
+    <div className="space-y-6 select-none cursor-default font-sans pb-8">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
-            <button onClick={() => navigate('/admin/reports')} className="hover:text-[#166534]">
-              State Reports
-            </button>
-            <span>/</span>
-            <span className="text-[#166534] font-bold">Users</span>
-            <span>/</span>
-            <button onClick={() => navigate('/admin/profile')} className="hover:text-[#166534]">
-              Admin Profile
-            </button>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+              <Users className="w-3.5 h-3.5 text-emerald-700" />
+              Personnel Directory
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-[#111827] tracking-tight">System User Directory & Access Governance</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Government Admin portal to view system accounts, assign state/district roles, and control access privileges
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            User & Staff Management
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Administer Procurement Officers and Centre Managers across active government yards
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsAddUserModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-[#166534] hover:bg-[#14532d] text-white font-semibold rounded-xl px-5 py-2.5 transition-all text-sm shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Add User Account
-          </button>
-          <button
-            onClick={() => navigate('/admin/profile')}
-            className="flex items-center gap-2 bg-white hover:bg-[#166534]/5 text-[#166534] border border-[#166534]/30 font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-2xs"
-          >
-            Admin Profile <ArrowRight className="w-4 h-4" />
-          </button>
+        <button
+          type="button"
+          onClick={() => setShowAddModal(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer self-start sm:self-auto"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Add {activeTab === 'officers' ? 'Officer' : 'Centre Manager'}</span>
+        </button>
+      </div>
+
+      {/* ── NOTICE TOAST ── */}
+      {notice && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-3 text-xs font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <span>{notice}</span>
+        </div>
+      )}
+
+      {/* ── SUMMARY STATS (MAX 4 CARDS) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-slate-500">Total Personnel</p>
+          <p className="text-2xl font-extrabold text-slate-900 font-mono mt-1">{totalStaff}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Officers & Managers</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-emerald-700">Active Officers</p>
+          <p className="text-2xl font-extrabold text-emerald-800 font-mono mt-1">{activeOfficersCount}</p>
+          <p className="text-[11px] text-emerald-600 mt-1">On Yard Duty</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-emerald-700">Active Managers</p>
+          <p className="text-2xl font-extrabold text-emerald-800 font-mono mt-1">{activeManagersCount}</p>
+          <p className="text-[11px] text-emerald-600 mt-1">Mandi Centre Chiefs</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <p className="text-xs font-semibold text-slate-500">Disabled Staff</p>
+          <p className="text-2xl font-extrabold text-slate-700 font-mono mt-1">{disabledCount}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Inactive / Transferred</p>
         </div>
       </div>
 
-      {/* ── User Summary Stats ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
-          <div className="p-3 rounded-xl shrink-0 bg-[#166534]/10 text-[#166534]">
-            <UsersIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Registered Accounts</p>
-            <p className="text-2xl font-bold text-[#111827] mt-0.5 font-mono leading-tight">{usersList.length} Users</p>
-            <p className="text-[11px] text-slate-400 font-medium mt-0.5">Government Officer Credentials</p>
-          </div>
+      {/* ── TAB SELECTOR & SEARCH ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+        {/* Tabs */}
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg">
+          <button
+            type="button"
+            onClick={() => setActiveTab('officers')}
+            className={
+              'flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ' +
+              (activeTab === 'officers'
+                ? 'bg-emerald-800 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900')
+            }
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Procurement Officers ({officers.length})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('managers')}
+            className={
+              'flex items-center gap-2 px-4 py-2 rounded-md text-xs font-bold transition-all cursor-pointer ' +
+              (activeTab === 'managers'
+                ? 'bg-emerald-800 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900')
+            }
+          >
+            <Building2 className="w-3.5 h-3.5" />
+            <span>Centre Managers ({managers.length})</span>
+          </button>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
-          <div className="p-3 rounded-xl shrink-0 bg-[#15803D]/10 text-[#15803D]">
-            <UserCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Sessions</p>
-            <p className="text-2xl font-bold text-[#166534] mt-0.5 font-mono leading-tight">{activeCount} Active</p>
-            <p className="text-[11px] text-[#15803D] font-semibold mt-0.5">Authorized Operating State</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
-          <div className="p-3 rounded-xl shrink-0 bg-[#d97706]/10 text-[#d97706]">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Admin Officers</p>
-            <p className="text-2xl font-bold text-[#d97706] mt-0.5 font-mono leading-tight">
-              {usersList.filter((u) => u.role === 'Admin').length} Admins
-            </p>
-            <p className="text-[11px] text-amber-700 font-medium mt-0.5">State Secretariat Level</p>
-          </div>
+        {/* Search */}
+        <div className="relative w-full sm:w-72">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={`Search ${activeTab} by name or ID...`}
+            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-600 bg-slate-50/50"
+          />
         </div>
       </div>
 
-      {/* ── User Table Container ── */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search user name or role (e.g. User 01)..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#15803D] text-sm bg-white"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-slate-500 shrink-0" />
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full sm:w-48 px-3 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] bg-[#F8FAFC] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#15803D]"
-            >
-              {roles.map((r) => (
-                <option key={r} value={r}>
-                  {r === 'All' ? 'All Roles (District / Centre / Admin)' : `Role: ${r}`}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Clean Table: User | Role | Status */}
-        <div className="overflow-x-auto rounded-xl border border-[#E5E7EB]">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F8FAFC] text-slate-700 font-semibold border-b border-[#E5E7EB]">
-              <tr>
-                <th className="py-3 px-4">User Handle</th>
-                <th className="py-3 px-4">Officer Name & Contact</th>
-                <th className="py-3 px-4">Assigned Role</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E5E7EB]">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((u) => (
-                  <tr key={u.userId} className="hover:bg-[#F8FAFC]/80 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#166534]">{u.user}</td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-[#166534]/10 text-[#166534] font-bold text-xs flex items-center justify-center font-mono">
-                          {u.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-[#111827]">{u.name}</p>
-                          <p className="text-xs text-slate-500 font-mono">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-800 border border-slate-200">
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                          u.status === 'Active'
-                            ? 'bg-emerald-50 text-[#166534] border border-emerald-200'
-                            : 'bg-red-50 text-red-700 border border-red-200'
-                        }`}
-                      >
-                        {u.status === 'Active' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5" />
-                        )}
-                        {u.status}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => toggleUserStatus(u.userId)}
-                        className={`font-semibold rounded-lg px-3.5 py-1.5 transition-all text-xs shadow-2xs ${
-                          u.status === 'Active'
-                            ? 'bg-white text-red-600 border border-red-200 hover:bg-red-50'
-                            : 'bg-[#166534] text-white hover:bg-[#14532d]'
-                        }`}
-                      >
-                        {u.status === 'Active' ? 'Deactivate' : 'Activate'}
-                      </button>
+      {/* ── OFFICERS TABLE TAB ── */}
+      {activeTab === 'officers' && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3.5 px-4">Officer Name</th>
+                  <th className="py-3.5 px-4">Employee ID</th>
+                  <th className="py-3.5 px-4">Assigned Centre</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+                {filteredOfficers.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="py-8 text-center text-slate-400">
+                      No procurement officers found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
-                    No user matches your search/filter criteria.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredOfficers.map((officer) => {
+                    const isActive = officer.status === 'Active';
+                    return (
+                      <tr key={officer.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-4 font-semibold text-slate-900">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shrink-0">
+                              {officer.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900">{officer.name}</p>
+                              <p className="text-[11px] text-slate-400">{officer.designation || 'Inspection Officer'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
+                          {officer.employeeId}
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-700 font-medium">
+                          {officer.assignedCentre}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={
+                              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ' +
+                              (isActive
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-rose-50 text-rose-700 border-rose-200')
+                            }
+                          >
+                            <span
+                              className={
+                                'w-1.5 h-1.5 rounded-full ' +
+                                (isActive ? 'bg-emerald-600' : 'bg-rose-600')
+                              }
+                            />
+                            <span>{officer.status}</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="inline-flex items-center gap-1.5 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setViewUser({ ...officer, roleType: 'Officer' })}
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition-colors cursor-pointer"
+                            >
+                              View
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditUser({ ...officer })}
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleOfficer(officer)}
+                              className={
+                                'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ' +
+                                (isActive
+                                  ? 'text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200'
+                                  : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200')
+                              }
+                            >
+                              {isActive ? 'Disable' : 'Enable'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ── Add User Modal ── */}
-      {isAddUserModalOpen && (
-        <Modal
-          isOpen={isAddUserModalOpen}
-          onClose={() => setIsAddUserModalOpen(false)}
-          title="Onboard New Government User Account"
-        >
-          <form onSubmit={handleAddUserSubmit} className="space-y-4 text-sm">
-            <div>
-              <label className="block font-semibold text-[#111827] mb-1">Full Officer Name</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Dr. Rajesh Sharma / Officer Name"
-                value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] focus:ring-2 focus:ring-[#15803D] focus:outline-none"
-              />
+      {/* ── MANAGERS TABLE TAB ── */}
+      {activeTab === 'managers' && (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3.5 px-4">Manager Name</th>
+                  <th className="py-3.5 px-4">Employee ID</th>
+                  <th className="py-3.5 px-4">Assigned Centre</th>
+                  <th className="py-3.5 px-4">Status</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+                {filteredManagers.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="py-8 text-center text-slate-400">
+                      No centre managers found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredManagers.map((mgr) => {
+                    const isActive = mgr.status === 'Active';
+                    return (
+                      <tr key={mgr.id} className="hover:bg-slate-50/80 transition-colors">
+                        <td className="py-3.5 px-4 font-semibold text-slate-900">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-full bg-emerald-800 text-white flex items-center justify-center font-bold text-xs shrink-0">
+                              {mgr.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-bold text-slate-900">{mgr.name}</p>
+                              <p className="text-[11px] text-slate-400">Centre Manager In-Charge</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-slate-700">
+                          {mgr.employeeId}
+                        </td>
+                        <td className="py-3.5 px-4 text-slate-700 font-medium">
+                          {mgr.assignedCentre}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={
+                              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ' +
+                              (isActive
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-rose-50 text-rose-700 border-rose-200')
+                            }
+                          >
+                            <span
+                              className={
+                                'w-1.5 h-1.5 rounded-full ' +
+                                (isActive ? 'bg-emerald-600' : 'bg-rose-600')
+                              }
+                            />
+                            <span>{mgr.status}</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="inline-flex items-center gap-1.5 justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setViewUser({ ...mgr, roleType: 'Manager' })}
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition-colors cursor-pointer"
+                            >
+                              View
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditUser({ ...mgr })}
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleManager(mgr)}
+                              className={
+                                'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ' +
+                                (isActive
+                                  ? 'text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200'
+                                  : 'text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200')
+                              }
+                            >
+                              {isActive ? 'Disable' : 'Enable'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ── VIEW USER MODAL ── */}
+      {viewUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-emerald-900 text-white">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-emerald-300" />
+                <h3 className="font-bold text-base">{viewUser.roleType} Profile</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setViewUser(null)}
+                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-5 space-y-3.5 text-xs">
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                <div className="w-12 h-12 rounded-full bg-emerald-800 text-white flex items-center justify-center font-bold text-lg">
+                  {viewUser.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="font-bold text-base text-slate-900">{viewUser.name}</p>
+                  <p className="text-slate-500 font-mono text-xs mt-0.5">ID: {viewUser.employeeId}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-slate-600">
+                <div className="flex justify-between py-1 border-b border-slate-50">
+                  <span className="font-semibold text-slate-500">Assigned Centre:</span>
+                  <span className="font-bold text-slate-900 text-right">{viewUser.assignedCentre}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-50">
+                  <span className="font-semibold text-slate-500">Phone:</span>
+                  <span className="font-mono text-slate-900">{viewUser.phone || '+91 98000 00000'}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-50">
+                  <span className="font-semibold text-slate-500">Official Email:</span>
+                  <span className="text-slate-900">{viewUser.email || 'officer@gov.in'}</span>
+                </div>
+                <div className="flex justify-between py-1 border-b border-slate-50">
+                  <span className="font-semibold text-slate-500">Status:</span>
+                  <span
+                    className={
+                      'font-bold ' +
+                      (viewUser.status === 'Active' ? 'text-emerald-700' : 'text-rose-700')
+                    }
+                  >
+                    {viewUser.status}
+                  </span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="font-semibold text-slate-500">Joining Date:</span>
+                  <span className="text-slate-900">{viewUser.joiningDate || '01 Jan 2023'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setViewUser(null)}
+                className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-100 cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT USER MODAL ── */}
+      {editUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-emerald-900 text-white">
+              <div className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-emerald-300" />
+                <h3 className="font-bold text-base">Edit User Information</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditUser(null)}
+                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEdit} className="p-5 space-y-3.5 text-xs">
               <div>
-                <label className="block font-semibold text-[#111827] mb-1">User Role</label>
+                <label className="block font-bold text-slate-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editUser.name}
+                  onChange={(e) => setEditUser({ ...editUser, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Employee ID</label>
+                <input
+                  type="text"
+                  required
+                  value={editUser.employeeId}
+                  onChange={(e) => setEditUser({ ...editUser, employeeId: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Assigned Centre</label>
                 <select
-                  value={newUser.role}
-                  onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-                  className="w-full px-3 py-2.5 rounded-xl border border-[#E5E7EB] bg-white text-[#111827] focus:ring-2 focus:ring-[#15803D] focus:outline-none"
+                  value={editUser.assignedCentre}
+                  onChange={(e) => setEditUser({ ...editUser, assignedCentre: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white"
                 >
-                  <option value="District">District</option>
-                  <option value="Centre">Centre</option>
-                  <option value="Admin">Admin</option>
+                  {centres.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              <div>
-                <label className="block font-semibold text-[#111827] mb-1">Official Email</label>
-                <input
-                  type="email"
-                  placeholder="user@gov.in"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] focus:ring-2 focus:ring-[#15803D] focus:outline-none"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={editUser.phone || ''}
+                    onChange={(e) => setEditUser({ ...editUser, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Official Email</label>
+                  <input
+                    type="email"
+                    value={editUser.email || ''}
+                    onChange={(e) => setEditUser({ ...editUser, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex justify-end gap-3 pt-3">
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditUser(null)}
+                  className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold cursor-pointer hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold cursor-pointer"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── ADD NEW USER MODAL ── */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-emerald-900 text-white">
+              <div className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-emerald-300" />
+                <h3 className="font-bold text-base">
+                  Add New {activeTab === 'officers' ? 'Procurement Officer' : 'Centre Manager'}
+                </h3>
+              </div>
               <button
                 type="button"
-                onClick={() => setIsAddUserModalOpen(false)}
-                className="bg-white hover:bg-slate-50 text-[#15803D] border border-[#15803D] font-semibold rounded-xl px-4 py-2 text-sm transition-colors"
+                onClick={() => setShowAddModal(false)}
+                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="bg-[#166534] hover:bg-[#14532d] text-white font-semibold rounded-xl px-5 py-2 text-sm shadow-xs transition-colors"
-              >
-                Save User Account
+                <X className="w-5 h-5" />
               </button>
             </div>
-          </form>
-        </Modal>
+
+            <form onSubmit={handleCreateUser} className="p-5 space-y-3.5 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Kumar"
+                  value={newUserForm.name}
+                  onChange={(e) => setNewUserForm({ ...newUserForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Government Employee ID</label>
+                <input
+                  type="text"
+                  required
+                  placeholder={activeTab === 'officers' ? 'e.g. INS-TN-5501' : 'e.g. MGR-TN-409'}
+                  value={newUserForm.employeeId}
+                  onChange={(e) => setNewUserForm({ ...newUserForm, employeeId: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:outline-none focus:border-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Assigned Centre</label>
+                <select
+                  value={newUserForm.assignedCentre || (centres[0]?.name || '')}
+                  onChange={(e) => setNewUserForm({ ...newUserForm, assignedCentre: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white"
+                >
+                  {centres.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Mobile Number</label>
+                  <input
+                    type="tel"
+                    placeholder="+91 98000 00000"
+                    value={newUserForm.phone}
+                    onChange={(e) => setNewUserForm({ ...newUserForm, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Govt Email</label>
+                  <input
+                    type="email"
+                    placeholder="user@gov.in"
+                    value={newUserForm.email}
+                    onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-200 flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-700 font-semibold cursor-pointer hover:bg-slate-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold cursor-pointer"
+                >
+                  Create User
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
-export default Users;
-
+export default UsersPage;

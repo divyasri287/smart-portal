@@ -1,253 +1,379 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Building2, Search, Filter, CheckCircle2, XCircle, Layers, ArrowRight, ShieldCheck, MapPin, Phone, User, Activity } from 'lucide-react';
-import Modal from '../../components/dialogs/Modal';
-import { centreMonitoringData, dashboardOverviewStats } from '../../data/adminData';
+import React, { useState, useEffect } from 'react';
+import {
+  Building2,
+  Search,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Eye,
+  X,
+  Power,
+  Phone,
+  Mail,
+  MapPin,
+  Scale,
+  Activity,
+} from 'lucide-react';
+import adminStorage from '../../utils/adminStorage';
 
 export const CentreMonitoring = () => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('All');
+  const [centres, setCentres] = useState(() => adminStorage.getCentres());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All'); // 'All' | 'Open' | 'Closed'
   const [selectedCentre, setSelectedCentre] = useState(null);
+  const [actionNotice, setActionNotice] = useState(null);
 
-  const statuses = ['All', 'Active', 'Inactive'];
+  useEffect(() => {
+    setCentres(adminStorage.getCentres());
+  }, []);
 
-  const filteredCentres = centreMonitoringData.filter((c) => {
+  const handleToggleStatus = (centre) => {
+    const updated = adminStorage.toggleCentreStatus(centre.id);
+    setCentres(adminStorage.getCentres());
+    if (selectedCentre && selectedCentre.id === centre.id) {
+      setSelectedCentre(updated);
+    }
+    setActionNotice(
+      `Centre "${centre.name}" is now ${updated.status.toUpperCase()}.`
+    );
+    setTimeout(() => setActionNotice(null), 3000);
+  };
+
+  // Filtered centres
+  const filteredCentres = centres.filter((c) => {
     const matchesSearch =
-      c.centreName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.centreCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.district.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.manager.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = selectedStatus === 'All' || c.status === selectedStatus;
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.manager.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'All' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
+  const totalCentres = centres.length;
+  const openCount = centres.filter((c) => c.status === 'Open').length;
+  const closedCount = centres.filter((c) => c.status === 'Closed').length;
+  const totalQueue = centres.reduce((sum, c) => sum + (c.todayQueue || 0), 0);
+
   return (
-    <div className="space-y-7">
-      {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-5 border-b border-[#E5E7EB]">
+    <div className="space-y-6 select-none cursor-default font-sans pb-8">
+      {/* ── HEADER ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-1">
-            <button onClick={() => navigate('/admin/district-overview')} className="hover:text-[#166534]">
-              District Overview
-            </button>
-            <span>/</span>
-            <span className="text-[#166534] font-bold">Centre Monitoring</span>
-            <span>/</span>
-            <button onClick={() => navigate('/admin/payment-monitoring')} className="hover:text-[#166534]">
-              Payment Monitoring
-            </button>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+              <Building2 className="w-3.5 h-3.5 text-emerald-700" />
+              Depot Infrastructure
+            </span>
           </div>
-          <h1 className="text-2xl font-bold text-[#111827] tracking-tight">Procurement Centre Monitoring</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Government Admin portal to monitor operational status, weighbridge capacity, and manager contact across all centres
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Procurement Centre Monitoring
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Real-time status, operational gate control, and live queue oversight across all Mandis
           </p>
         </div>
-        <button
-          onClick={() => navigate('/admin/payment-monitoring')}
-          className="shrink-0 flex items-center gap-2 bg-[#166534] hover:bg-[#14532d] text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
-        >
-          Payment Monitoring <ArrowRight className="w-4 h-4" />
-        </button>
       </div>
 
-      {/* ── Top Monitoring KPI Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
-          <div className="p-3 rounded-xl shrink-0 bg-[#166534]/10 text-[#166534]">
-            <Layers className="w-5 h-5" />
+      {/* ── ACTION NOTICE TOAST ── */}
+      {actionNotice && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-3 text-xs font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+          <span>{actionNotice}</span>
+        </div>
+      )}
+
+      {/* ── TOP SUMMARY CARDS (MAX 4 AS SPECIFIED) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold text-slate-500">Total Centres</p>
+            <Building2 className="w-4 h-4 text-slate-400" />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Mandi Centres</p>
-            <p className="text-2xl font-bold text-[#111827] mt-0.5 font-mono leading-tight">{dashboardOverviewStats.totalCentres}</p>
-            <p className="text-[11px] text-slate-400 font-medium mt-0.5">Registered Procurement Hubs</p>
-          </div>
+          <p className="text-2xl font-extrabold text-slate-900 font-mono">{totalCentres}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Registered Mandis</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
-          <div className="p-3 rounded-xl shrink-0 bg-[#15803D]/10 text-[#15803D]">
-            <CheckCircle2 className="w-5 h-5" />
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold text-emerald-700">Centres Open</p>
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Centres</p>
-            <p className="text-2xl font-bold text-[#111827] mt-0.5 font-mono leading-tight">{dashboardOverviewStats.activeCentres}</p>
-            <p className="text-[11px] text-[#15803D] font-semibold mt-0.5">Operational & Live Procuring</p>
-          </div>
+          <p className="text-2xl font-extrabold text-emerald-800 font-mono">{openCount}</p>
+          <p className="text-[11px] text-emerald-600 mt-1">Accepting Farmer Slots</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
-          <div className="p-3 rounded-xl shrink-0 bg-[#d97706]/10 text-[#d97706]">
-            <XCircle className="w-5 h-5" />
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold text-rose-700">Centres Closed</p>
+            <XCircle className="w-4 h-4 text-rose-600" />
           </div>
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Inactive Centres</p>
-            <p className="text-2xl font-bold text-[#111827] mt-0.5 font-mono leading-tight">{dashboardOverviewStats.inactiveCentres}</p>
-            <p className="text-[11px] text-amber-700 font-medium mt-0.5">Offline / Maintenance Yard</p>
+          <p className="text-2xl font-extrabold text-rose-800 font-mono">{closedCount}</p>
+          <p className="text-[11px] text-rose-500 mt-1">Standby / Off-shift</p>
+        </div>
+
+        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold text-slate-500">Total Queue</p>
+            <Clock className="w-4 h-4 text-amber-500" />
           </div>
+          <p className="text-2xl font-extrabold text-slate-900 font-mono">{totalQueue}</p>
+          <p className="text-[11px] text-slate-400 mt-1">Vehicles in Line</p>
         </div>
       </div>
 
-      {/* ── Table Container ── */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-sm p-6 space-y-4">
-        {/* Controls Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search particular centre, manager, or district..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#15803D] text-sm bg-white"
-            />
-          </div>
+      {/* ── SEARCH & FILTER CONTROLS ── */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="relative w-full sm:w-80">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by centre name or district..."
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-600 bg-slate-50/50"
+          />
+        </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Filter className="w-4 h-4 text-slate-500 shrink-0" />
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full sm:w-52 px-3 py-2.5 rounded-xl border border-[#E5E7EB] text-[#111827] bg-[#F8FAFC] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#15803D]"
+        <div className="flex items-center gap-1.5 self-start sm:self-auto">
+          <span className="text-xs font-semibold text-slate-500 mr-1">Filter:</span>
+          {['All', 'Open', 'Closed'].map((st) => (
+            <button
+              key={st}
+              type="button"
+              onClick={() => setStatusFilter(st)}
+              className={
+                'px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ' +
+                (statusFilter === st
+                  ? 'bg-emerald-800 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
+              }
             >
-              {statuses.map((st) => (
-                <option key={st} value={st}>
-                  {st === 'All' ? 'All Statuses (Active / Inactive)' : `Status: ${st}`}
-                </option>
-              ))}
-            </select>
-          </div>
+              {st}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Clean Table: Centre | District | Status */}
-        <div className="overflow-x-auto rounded-xl border border-[#E5E7EB]">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-[#F8FAFC] text-slate-700 font-semibold border-b border-[#E5E7EB]">
-              <tr>
-                <th className="py-3 px-4">Centre Code</th>
-                <th className="py-3 px-4">Centre Name</th>
-                <th className="py-3 px-4">District (State)</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+      {/* ── CENTRES TABLE ── */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <th className="py-3.5 px-4">Centre Name</th>
+                <th className="py-3.5 px-4">District</th>
+                <th className="py-3.5 px-4">Manager</th>
+                <th className="py-3.5 px-4">Status</th>
+                <th className="py-3.5 px-4">Today's Queue</th>
+                <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5E7EB]">
-              {filteredCentres.length > 0 ? (
-                filteredCentres.map((c) => (
-                  <tr key={c.centreCode} className="hover:bg-[#F8FAFC]/80 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-[#166534]">{c.centreCode}</td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-semibold text-[#111827]">{c.centreName}</div>
-                      <div className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-0.5">
-                        <User className="w-3 h-3 text-slate-400" /> Manager: {c.manager}
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-700 font-medium">
-                      {c.district} <span className="text-xs text-slate-400 font-normal">({c.state})</span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
-                          c.status === 'Active'
-                            ? 'bg-emerald-50 text-[#166534] border border-emerald-200'
-                            : 'bg-amber-50 text-amber-700 border border-amber-200'
-                        }`}
-                      >
-                        {c.status === 'Active' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5" />
-                        )}
-                        {c.status}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedCentre(c)}
-                        className="bg-white hover:bg-[#166534]/5 text-[#166534] border border-[#166534]/30 hover:border-[#166534] font-semibold rounded-lg px-3 py-1.5 transition-all text-xs shadow-2xs"
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+            <tbody className="divide-y divide-slate-100 text-xs text-slate-700">
+              {filteredCentres.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-500 font-medium">
-                    No centre matches your search/filter criteria.
+                  <td colSpan="6" className="py-8 text-center text-slate-400">
+                    No procurement centres found matching your search.
                   </td>
                 </tr>
+              ) : (
+                filteredCentres.map((centre) => {
+                  const isOpen = centre.status === 'Open';
+                  return (
+                    <tr key={centre.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900">
+                        <div className="flex items-center gap-2.5">
+                          <Building2 className="w-4 h-4 text-emerald-800 shrink-0" />
+                          <span>{centre.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-slate-600 font-medium">
+                        {centre.district}, {centre.state}
+                      </td>
+                      <td className="py-3.5 px-4 font-medium text-slate-800">
+                        {centre.manager}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={
+                            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ' +
+                            (isOpen
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-rose-50 text-rose-700 border-rose-200')
+                          }
+                        >
+                          <span
+                            className={
+                              'w-1.5 h-1.5 rounded-full ' +
+                              (isOpen ? 'bg-emerald-600' : 'bg-rose-600')
+                            }
+                          />
+                          <span>{centre.status}</span>
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
+                        {centre.todayQueue} Vehicles
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="inline-flex items-center gap-2 justify-end">
+                          {/* View Button */}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedCentre(centre)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 transition-colors cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-slate-500" />
+                            <span>View</span>
+                          </button>
+
+                          {/* Open Centre / Close Centre Button */}
+                          {isOpen ? (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(centre)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+                              title="Close this centre for slot booking"
+                            >
+                              <Power className="w-3.5 h-3.5 text-rose-600" />
+                              <span>Close Centre</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(centre)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors cursor-pointer"
+                              title="Open this centre for slot booking"
+                            >
+                              <Power className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>Open Centre</span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── Centre Detail Modal ── */}
+      {/* ── VIEW CENTRE DETAILS MODAL ── */}
       {selectedCentre && (
-        <Modal
-          isOpen={Boolean(selectedCentre)}
-          onClose={() => setSelectedCentre(null)}
-          title={`Centre Information: ${selectedCentre.centreName}`}
-        >
-          <div className="space-y-4 text-sm">
-            <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-base text-[#111827] flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-[#166534]" /> {selectedCentre.centreName}
-                </h4>
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                    selectedCentre.status === 'Active'
-                      ? 'bg-emerald-50 text-[#166534] border border-emerald-200'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200'
-                  }`}
-                >
-                  {selectedCentre.status}
-                </span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-emerald-900 text-white">
+              <div className="flex items-center gap-2.5">
+                <Building2 className="w-5 h-5 text-emerald-300" />
+                <div>
+                  <h3 className="font-bold text-base">{selectedCentre.name}</h3>
+                  <p className="text-xs text-emerald-200 font-mono">
+                    ID: {selectedCentre.id} · {selectedCentre.district}, {selectedCentre.state}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-slate-600 flex items-center gap-1">
-                <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                District: <span className="font-semibold text-[#111827]">{selectedCentre.district}</span> ({selectedCentre.state})
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 font-mono">
-              <div className="p-3 rounded-xl border border-[#E5E7EB] bg-white">
-                <span className="text-[11px] font-sans text-slate-500 block">Centre Manager</span>
-                <span className="font-bold text-[#111827] block truncate">{selectedCentre.manager}</span>
-                <span className="text-xs text-slate-500 font-mono block mt-0.5">{selectedCentre.phone}</span>
-              </div>
-
-              <div className="p-3 rounded-xl border border-[#E5E7EB] bg-white">
-                <span className="text-[11px] font-sans text-slate-500 block">Capacity Utilized</span>
-                <span className="font-bold text-[#166534] text-lg block">{selectedCentre.capacityUtilized}</span>
-              </div>
-
-              <div className="p-3 rounded-xl border border-[#E5E7EB] bg-white">
-                <span className="text-[11px] font-sans text-slate-500 block">Active Weighbridges</span>
-                <span className="font-bold text-[#111827] block">{selectedCentre.activeWeighbridges} Weighbridges</span>
-              </div>
-
-              <div className="p-3 rounded-xl border border-[#E5E7EB] bg-white">
-                <span className="text-[11px] font-sans text-slate-500 block">Procured Today</span>
-                <span className="font-bold text-[#15803D] block">{selectedCentre.procuredTodayTons} Tons</span>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
               <button
+                type="button"
                 onClick={() => setSelectedCentre(null)}
-                className="bg-[#166534] hover:bg-[#14532d] text-white font-semibold rounded-xl px-5 py-2 text-sm shadow-xs transition-colors"
+                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 text-xs">
+              {/* Centre Status Banner */}
+              <div
+                className={
+                  'p-3 rounded-xl border flex items-center justify-between ' +
+                  (selectedCentre.status === 'Open'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                    : 'bg-rose-50 border-rose-200 text-rose-900')
+                }
+              >
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <span
+                    className={
+                      'w-2 h-2 rounded-full ' +
+                      (selectedCentre.status === 'Open'
+                        ? 'bg-emerald-600 animate-pulse'
+                        : 'bg-rose-600')
+                    }
+                  />
+                  <span>Status: {selectedCentre.status.toUpperCase()}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleToggleStatus(selectedCentre)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white border shadow-2xs hover:bg-slate-50 cursor-pointer"
+                >
+                  {selectedCentre.status === 'Open' ? 'Close Centre Now' : 'Open Centre Now'}
+                </button>
+              </div>
+
+              {/* Grid Attributes */}
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                  <p className="text-[11px] font-semibold text-slate-500">Active Weighbridge Bays</p>
+                  <p className="text-lg font-bold text-slate-900 mt-0.5 font-mono">
+                    {selectedCentre.activeBays} Bays
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                  <p className="text-[11px] font-semibold text-slate-500">Daily Handling Capacity</p>
+                  <p className="text-lg font-bold text-slate-900 mt-0.5 font-mono">
+                    {selectedCentre.capacityMT} MT / Day
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                  <p className="text-[11px] font-semibold text-slate-500">Vehicles in Queue</p>
+                  <p className="text-lg font-bold text-slate-900 mt-0.5 font-mono">
+                    {selectedCentre.todayQueue} Vehicles
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                  <p className="text-[11px] font-semibold text-slate-500">Today's Procurement</p>
+                  <p className="text-lg font-bold text-slate-900 mt-0.5 font-mono">
+                    {selectedCentre.todayProcuredMT} MT
+                  </p>
+                </div>
+              </div>
+
+              {/* Manager Contact Info */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <p className="font-bold text-slate-800 text-xs uppercase tracking-wider">
+                  Centre Manager In-Charge
+                </p>
+                <p className="text-sm font-bold text-slate-900">{selectedCentre.manager}</p>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-slate-600">
+                  <div className="flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{selectedCentre.managerPhone}</span>
+                  </div>
+                  <span className="hidden sm:inline text-slate-300">·</span>
+                  <div className="flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{selectedCentre.managerEmail}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedCentre(null)}
+                className="px-4 py-2 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-semibold border border-slate-300 text-xs cursor-pointer"
               >
                 Close Modal
               </button>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   );
 };
 
 export default CentreMonitoring;
-
