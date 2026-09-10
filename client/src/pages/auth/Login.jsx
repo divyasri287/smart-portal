@@ -9,7 +9,7 @@ import { ShieldCheck } from 'lucide-react';
 
 export const Login = () => {
   const navigate = useNavigate();
-  const { switchRole } = useAuth();
+  const { login } = useAuth();
 
   const [selectedRole, setSelectedRole] = useState(ROLES.FARMER);
   const [identifier, setIdentifier] = useState('');
@@ -17,7 +17,7 @@ export const Login = () => {
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    switchRole(selectedRole);
+    login(selectedRole);
 
     // Navigate to role-specific dashboard
     switch (selectedRole) {

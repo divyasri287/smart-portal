@@ -1,18 +1,10 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ROLE_LABELS } from '../../constants/roles';
-import RoleSwitcher from './RoleSwitcher';
-import { LogOut, Menu, X, ShieldCheck } from 'lucide-react';
+import { Menu, ShieldCheck, User } from 'lucide-react';
 
 export const Navbar = ({ onToggleMobileSidebar }) => {
-  const { role, user, logout } = useAuth();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 bg-emerald-800 text-white shadow-md border-b border-emerald-700">
@@ -55,28 +47,15 @@ export const Navbar = ({ onToggleMobileSidebar }) => {
           </Link>
         </div>
 
-        {/* Right: Current Role Badge, Role Switcher, Logout */}
-        <div className="flex items-center gap-3">
-          <RoleSwitcher />
-
-          {/* Current Role Tag */}
-          <div className="hidden md:flex flex-col items-end text-right">
-            <span className="text-xs text-emerald-200 font-medium">Role:</span>
-            <span className="text-xs font-semibold bg-emerald-900/80 px-2 py-0.5 rounded text-emerald-100 border border-emerald-600">
-              {ROLE_LABELS[role] || 'Guest'}
+        {/* Right: Logged-in User Badge */}
+        {user && (
+          <div className="flex items-center gap-2 bg-emerald-900/60 px-3 py-1.5 rounded-md border border-emerald-700/50">
+            <User className="w-4 h-4 text-emerald-200" />
+            <span className="text-xs font-semibold text-emerald-100">
+              {user.name}
             </span>
           </div>
-
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 bg-rose-700/80 hover:bg-rose-700 text-white text-xs font-semibold px-3 py-2 rounded-md transition-colors border border-rose-600 shadow-xs"
-            title="Logout"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-        </div>
+        )}
       </div>
     </header>
   );

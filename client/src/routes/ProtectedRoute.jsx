@@ -3,11 +3,25 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const ProtectedRoute = ({ allowedRoles = [] }) => {
-  const { role } = useAuth();
+  const { isAuthenticated, role } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   if (allowedRoles.length > 0 && !allowedRoles.includes(role)) {
-    // For easy testing in development/hackathon demo, allow preview or redirect to login
-    return <Outlet />;
+    switch (role) {
+      case 'farmer':
+        return <Navigate to="/farmer/dashboard" replace />;
+      case 'officer':
+        return <Navigate to="/officer/dashboard" replace />;
+      case 'manager':
+        return <Navigate to="/manager/dashboard" replace />;
+      case 'admin':
+        return <Navigate to="/admin/dashboard" replace />;
+      default:
+        return <Navigate to="/login" replace />;
+    }
   }
 
   return <Outlet />;
