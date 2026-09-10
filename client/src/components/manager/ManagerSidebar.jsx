@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Activity, 
@@ -11,10 +11,20 @@ import {
   Bell,
   User,
   Shield,
-  Building2
+  Building2,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export const ManagerSidebar = ({ onCloseMobile }) => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/select-role');
+    if (onCloseMobile) onCloseMobile();
+  };
   const mainLinks = [
     { to: '/manager/dashboard', label: 'Command Centre', icon: LayoutDashboard, badge: null },
     { to: '/manager/queue-monitoring', label: 'Queue Oversight', icon: Activity, badge: 'Live' },
@@ -119,7 +129,17 @@ export const ManagerSidebar = ({ onCloseMobile }) => {
       </div>
 
       {/* Footer Support Info */}
-      <div className="mt-auto pt-4 border-t border-[#E5E7EB] px-1">
+      <div className="mt-auto pt-4 border-t border-[#E5E7EB] px-1 space-y-3">
+        {/* Logout Button */}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50/70 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 transition-colors cursor-pointer"
+        >
+          <LogOut className="w-4 h-4 text-rose-600 shrink-0" />
+          <span>Logout</span>
+        </button>
+
         <div className="p-3 bg-[#F8FAFC] border border-[#E5E7EB] rounded-xl text-[11px] text-slate-600">
           <div className="flex items-center gap-2 text-[#166534] font-bold font-['Poppins'] mb-1">
             <Shield className="w-3.5 h-3.5" />

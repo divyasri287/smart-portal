@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   QrCode,
@@ -8,10 +8,14 @@ import {
   BarChart3,
   History,
   AlertTriangle,
+  LogOut,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import officerStorage from '../../utils/officerStorage';
 
 export const OfficerSidebar = ({ onCloseMobile }) => {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const profile = officerStorage.getProfile();
 
   const getCleanInspectorName = (name) => {
@@ -32,10 +36,16 @@ export const OfficerSidebar = ({ onCloseMobile }) => {
     { to: '/officer/report-issue', label: 'Report Issue', icon: AlertTriangle },
   ];
 
+  const handleLogout = () => {
+    logout();
+    navigate('/select-role');
+    if (onCloseMobile) onCloseMobile();
+  };
+
   return (
     <div className="flex flex-col h-full bg-white select-none">
       {/* Sidebar Officer Quick Status Card */}
-      <div className="p-3 border-b border-slate-100 bg-slate-50/70">
+      <div className="p-3 border-b border-slate-100 bg-slate-50/70 shrink-0">
         <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200/70">
           <div className="w-8 h-8 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
             {profile.name ? profile.name.replace(/^inspector\s+/i, '').split(' ').map(n => n[0]).join('').slice(0, 2) : 'VS'}
@@ -79,10 +89,24 @@ export const OfficerSidebar = ({ onCloseMobile }) => {
         })}
       </nav>
 
-      {/* Footer Info */}
-      <div className="p-3 border-t border-slate-100 bg-slate-50/50 text-[10px] text-slate-400 text-center">
-        <p className="font-semibold text-slate-600">{profile.centreAssigned || 'Ludhiana Mandi Centre 4'}</p>
-        <p className="text-[9px] mt-0.5">Season Kharif 2026</p>
+      {/* Bottom Section: Logout Button & Centre Info */}
+      <div className="mt-auto border-t border-slate-200 bg-slate-50/60 shrink-0">
+        <div className="p-2.5">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-rose-600 bg-white hover:bg-rose-50 hover:text-rose-700 border border-rose-200 shadow-2xs transition-all cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>Logout</span>
+          </button>
+        </div>
+
+        {/* Footer Info */}
+        <div className="px-3 pb-3 pt-0.5 text-[10px] text-slate-400 text-center">
+          <p className="font-semibold text-slate-600 truncate">{profile.centreAssigned || 'Salem Main Procurement Centre'}</p>
+          <p className="text-[9px] mt-0.5 text-slate-400">Season Kharif 2026</p>
+        </div>
       </div>
     </div>
   );
