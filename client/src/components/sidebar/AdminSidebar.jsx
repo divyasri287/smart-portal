@@ -44,7 +44,7 @@ export const AdminSidebar = ({ onCloseMobile }) => {
     : 'SV';
 
   return (
-    <div className="flex flex-col h-full bg-white select-none border-r border-slate-200">
+    <div className="flex flex-col h-full bg-white select-none">
       {/* Admin Profile Strip (Officer Module Match) */}
       <div className="p-3 border-b border-slate-100 bg-slate-50/80 shrink-0">
         <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-green-50 border border-green-200">
