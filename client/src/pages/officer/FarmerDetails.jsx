@@ -108,7 +108,7 @@ export const FarmerDetails = () => {
   };
 
   return (
-    <div className="space-y-4 select-auto">
+    <div className="space-y-4 select-none cursor-default">
       {/* Dynamic Workflow Progress: Step 2 */}
       <ProcurementWorkflowProgress currentStep={2} />
 

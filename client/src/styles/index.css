@@ -53,18 +53,29 @@
    ========================================================= */
 .officer-portal-root {
   cursor: default !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.officer-portal-root *:not(input):not(textarea) {
+  caret-color: transparent !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .officer-portal-root button,
 .officer-portal-root a,
+.officer-portal-root select,
 .officer-portal-root [role="button"] {
   cursor: pointer !important;
 }
 
 .officer-portal-root input,
-.officer-portal-root textarea,
-.officer-portal-root select {
+.officer-portal-root textarea {
   cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  caret-color: auto !important;
 }
 
 /* Sleek custom scrollbars for independent officer panels */

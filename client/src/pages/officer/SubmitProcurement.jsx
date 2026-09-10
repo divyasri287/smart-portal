@@ -112,7 +112,7 @@ export const SubmitProcurement = () => {
   };
 
   return (
-    <div className="space-y-4 select-auto">
+    <div className="space-y-4 select-none cursor-default">
       {/* Dynamic Workflow Progress: Step 5 */}
       <ProcurementWorkflowProgress currentStep={5} />
 

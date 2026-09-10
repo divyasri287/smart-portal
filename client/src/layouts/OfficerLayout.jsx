@@ -35,7 +35,7 @@ export const OfficerLayout = () => {
   const displayName = getCleanInspectorName(profile.name);
 
   return (
-    <div className="officer-portal-root h-screen w-screen flex flex-col overflow-hidden bg-slate-50 text-slate-900 select-auto">
+    <div className="officer-portal-root h-screen w-screen flex flex-col overflow-hidden bg-slate-50 text-slate-900 select-none cursor-default">
       {/* FIXED / STICKY OFFICER HEADER */}
       <header className="shrink-0 z-30 bg-emerald-900 text-white shadow-md border-b border-emerald-800">
         {/* Top Government Strip */}

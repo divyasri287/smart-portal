@@ -56,7 +56,7 @@ export const WeightCheck = () => {
   };
 
   return (
-    <div className="space-y-4 select-auto">
+    <div className="space-y-4 select-none cursor-default">
       {/* Dynamic Workflow Progress: Step 4 */}
       <ProcurementWorkflowProgress currentStep={4} />
 

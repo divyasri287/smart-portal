@@ -22,7 +22,7 @@ export const Receipt = () => {
   );
 
   return (
-    <div className="space-y-5 max-w-2xl mx-auto select-auto">
+    <div className="space-y-5 max-w-2xl mx-auto select-none cursor-default">
       {/* Officer Receipt Print Styles */}
       <style>{`
         @media print {

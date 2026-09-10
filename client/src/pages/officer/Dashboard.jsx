@@ -83,7 +83,7 @@ export const OfficerDashboard = () => {
   };
 
   return (
-    <div className="space-y-4 select-auto">
+    <div className="space-y-4 select-none cursor-default">
       {/* A. MANDI WORKSTATION HEADER */}
       <div className="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-700 text-white rounded-xl p-4 sm:p-4.5 shadow-xs border border-emerald-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">

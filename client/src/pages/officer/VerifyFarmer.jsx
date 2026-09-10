@@ -190,7 +190,7 @@ export const VerifyFarmer = () => {
   ];
 
   return (
-    <div className="space-y-3.5 select-auto">
+    <div className="space-y-3.5 select-none cursor-default">
       {/* Dynamic Workflow Progress: Step 2 */}
       <ProcurementWorkflowProgress currentStep={2} />
 
