@@ -1,18 +1,18 @@
 {
-  "name": "smart-procurement-portal-root",
+  "name": "smart-procurement-portal",
   "version": "1.0.0",
-  "description": "Smart Procurement Portal (SIH 2026) Root Workspaces",
+  "description": "Smart Procurement Portal (SIH 2026) - Frontend LocalStorage Architecture",
   "scripts": {
-    "dev": "npm --prefix server run dev",
-    "start": "npm --prefix server start",
-    "seed": "npm --prefix server run seed",
-    "server": "npm --prefix server run dev",
-    "client": "npm --prefix client run dev"
+    "dev": "npm --prefix client run dev",
+    "start": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "preview": "npm --prefix client run preview"
   },
   "keywords": [
     "smart-procurement",
     "sih2026",
-    "backend"
+    "frontend",
+    "localstorage"
   ],
   "author": "SIH Team",
   "license": "MIT"

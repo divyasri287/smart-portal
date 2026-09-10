@@ -6,12 +6,24 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = sessionStorage.getItem('sih_user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch {
+        // ignore
+      }
+    }
+    return {
+      id: 'OFF-204',
+      name: 'Vikram Sharma',
+      role: ROLES.OFFICER,
+      centre: 'Salem Main Procurement Centre',
+    };
   });
 
   const [role, setRole] = useState(() => {
     const savedRole = sessionStorage.getItem('sih_role');
-    return savedRole || null;
+    return savedRole || ROLES.OFFICER;
   });
 
   const login = (selectedRole, customUser = null) => {

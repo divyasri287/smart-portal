@@ -5,6 +5,7 @@ import { ROLES } from '../constants/roles';
 
 // Layouts
 import MainLayout from '../layouts/MainLayout';
+import OfficerLayout from '../layouts/OfficerLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import Loader from '../components/loader/Loader';
 
@@ -30,23 +31,25 @@ export const AppRoutes = () => {
     <Suspense fallback={<Loader />}>
       <Routes>
         {/* Public Authentication Entry Points */}
+        <Route path="/" element={<Navigate to="/officer/dashboard" replace />} />
         <Route element={<AuthLayout />}>
-          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
         </Route>
 
-        {/* Protected Dashboard Application Shell */}
+        {/* Dedicated Procurement Officer Module Layout (Isolated with Fixed Header & Independent Scroll) */}
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.OFFICER]} />}>
+          <Route element={<OfficerLayout />}>
+            <Route path="/officer/*" element={<OfficerRoutes />} />
+          </Route>
+        </Route>
+
+        {/* Other Protected Modules Dashboard Application Shell (Preserved Untouched) */}
         <Route element={<MainLayout />}>
           {/* Farmer Module Routes */}
           <Route element={<ProtectedRoute allowedRoles={[ROLES.FARMER]} />}>
             <Route path="/farmer/*" element={<FarmerRoutes />} />
-          </Route>
-
-          {/* Procurement Officer Module Routes */}
-          <Route element={<ProtectedRoute allowedRoles={[ROLES.OFFICER]} />}>
-            <Route path="/officer/*" element={<OfficerRoutes />} />
           </Route>
 
           {/* Centre Manager Module Routes */}

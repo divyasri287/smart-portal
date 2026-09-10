@@ -4,7 +4,8 @@ import PageHeader from '../../components/common/PageHeader';
 import Card from '../../components/cards/Card';
 import SearchBox from '../../components/inputs/SearchBox';
 import { Eye, Download, ArrowUpDown } from 'lucide-react';
-import historyData from '../../data/procurementHistory.json';
+import officerStorage from '../../utils/officerStorage';
+import historyDataFallback from '../../data/procurementHistory.json';
 
 const statusConfig = {
   'Receipt Generated': { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', dot: 'bg-green-500' },
@@ -38,22 +39,23 @@ export const OfficerHistory = () => {
   const [search, setSearch] = useState('');
   const [gradeFilter, setGradeFilter] = useState('All');
 
+  const historyData = officerStorage.getHistory() || historyDataFallback;
   const grades = ['All', 'Grade A', 'FAQ', 'Rejected'];
 
   const filtered = historyData.filter((item) => {
     const q = search.toLowerCase();
     const matchSearch =
-      item.farmerName.toLowerCase().includes(q) ||
-      item.receiptId.toLowerCase().includes(q) ||
-      item.tokenNo.toLowerCase().includes(q) ||
-      item.commodity.toLowerCase().includes(q);
+      (item.farmerName && item.farmerName.toLowerCase().includes(q)) ||
+      (item.receiptId && item.receiptId.toLowerCase().includes(q)) ||
+      (item.tokenNo && item.tokenNo.toLowerCase().includes(q)) ||
+      (item.commodity && item.commodity.toLowerCase().includes(q));
     const matchGrade = gradeFilter === 'All' || item.gradeResult === gradeFilter;
     return matchSearch && matchGrade;
   });
 
   const totalAmount = filtered
     .filter((i) => i.status === 'Receipt Generated')
-    .reduce((sum, i) => sum + i.totalAmount, 0);
+    .reduce((sum, i) => sum + (i.totalAmount || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -99,11 +101,10 @@ export const OfficerHistory = () => {
             <button
               key={g}
               onClick={() => setGradeFilter(g)}
-              className={`text-xs font-semibold px-3 py-2 rounded-lg border transition-colors whitespace-nowrap ${
-                gradeFilter === g
+              className={`text-xs font-semibold px-3 py-2 rounded-lg border transition-colors whitespace-nowrap ${gradeFilter === g
                   ? 'bg-green-800 text-white border-green-800'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-green-700 hover:text-green-800'
-              }`}
+                }`}
             >
               {g}
             </button>

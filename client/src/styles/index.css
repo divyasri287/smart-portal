@@ -47,3 +47,46 @@
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
+
+/* =========================================================
+   PROCUREMENT OFFICER MODULE ISOLATED STYLING
+   ========================================================= */
+.officer-portal-root {
+  cursor: default !important;
+}
+
+.officer-portal-root button,
+.officer-portal-root a,
+.officer-portal-root [role="button"] {
+  cursor: pointer !important;
+}
+
+.officer-portal-root input,
+.officer-portal-root textarea,
+.officer-portal-root select {
+  cursor: text !important;
+}
+
+/* Sleek custom scrollbars for independent officer panels */
+.officer-portal-root aside::-webkit-scrollbar,
+.officer-portal-root main::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.officer-portal-root aside::-webkit-scrollbar-track,
+.officer-portal-root main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.officer-portal-root aside::-webkit-scrollbar-thumb,
+.officer-portal-root main::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.officer-portal-root aside::-webkit-scrollbar-thumb:hover,
+.officer-portal-root main::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+

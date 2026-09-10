@@ -12,6 +12,8 @@ import SubmitProcurement from '../pages/officer/SubmitProcurement';
 import Receipt from '../pages/officer/Receipt';
 import OfficerHistory from '../pages/officer/History';
 import OfficerProfile from '../pages/officer/Profile';
+import OfficerReports from '../pages/officer/Reports';
+import ReportIssue from '../pages/officer/ReportIssue';
 
 export const OfficerRoutes = () => {
   return (
@@ -27,8 +29,10 @@ export const OfficerRoutes = () => {
       <Route path="weight-check" element={<WeightCheck />} />
       <Route path="submit-procurement" element={<SubmitProcurement />} />
       <Route path="receipt/:id" element={<Receipt />} />
+      <Route path="reports" element={<OfficerReports />} />
       <Route path="history" element={<OfficerHistory />} />
       <Route path="profile" element={<OfficerProfile />} />
+      <Route path="report-issue" element={<ReportIssue />} />
     </Routes>
   );
 };

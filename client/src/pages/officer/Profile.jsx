@@ -8,6 +8,7 @@ import {
   ShieldCheck, MapPin, Clock, Edit3, BarChart3,
   CheckCircle2, TrendingUp, Award, Zap, Star
 } from 'lucide-react';
+import officerStorage from '../../utils/officerStorage';
 import officersData from '../../data/officers.json';
 
 const StatBadge = ({ icon: Icon, label, value, color = 'green' }) => {
@@ -31,8 +32,46 @@ const StatBadge = ({ icon: Icon, label, value, color = 'green' }) => {
 export const OfficerProfile = () => {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
+  const [officer, setOfficer] = useState(() => officerStorage.getProfile() || officersData[0]);
+  const [form, setForm] = useState({
+    name: officer.name ? officer.name.replace(/^inspector\s+/i, '') : 'Vikram Sharma',
+    badgeNo: officer.badgeNo || 'INS-PB-8891',
+    centreAssigned: officer.centreAssigned || 'Ludhiana Mandi Centre 4',
+    shift: officer.shift || 'Morning (08:00 AM – 04:00 PM)',
+  });
+  const [nameError, setNameError] = useState('');
 
-  const officer = officersData[0];
+  const getCleanInspectorName = (name) => {
+    if (!name) return 'Inspector Vikram Sharma';
+    const trimmed = name.trim();
+    return trimmed.toLowerCase().startsWith('inspector') ? trimmed : `Inspector ${trimmed}`;
+  };
+
+  const handleSave = () => {
+    const rawName = (form.name || '').trim();
+    if (!rawName || rawName.length < 2) {
+      setNameError('Inspector name is required and must be at least 2 characters.');
+      return;
+    }
+    const nameRegex = /^[a-zA-Z\s.-]+$/;
+    if (!nameRegex.test(rawName)) {
+      setNameError('Inspector name can only contain letters, dots, and hyphens.');
+      return;
+    }
+    setNameError('');
+
+    const formattedName = rawName.toLowerCase().startsWith('inspector') ? rawName : `Inspector ${rawName}`;
+    const updated = {
+      ...officer,
+      name: formattedName,
+      badgeNo: form.badgeNo.trim(),
+      centreAssigned: form.centreAssigned.trim(),
+      shift: form.shift.trim(),
+    };
+    officerStorage.updateProfile(updated);
+    setOfficer(updated);
+    setEditing(false);
+  };
 
   const todayStats = [
     { icon: CheckCircle2, label: 'Tokens Verified', value: '28', color: 'green' },
@@ -73,7 +112,7 @@ export const OfficerProfile = () => {
 
           {/* Info */}
           <div className="flex-1">
-            <h2 className="text-2xl font-bold">{officer.name}</h2>
+            <h2 className="text-2xl font-bold">{getCleanInspectorName(officer.name)}</h2>
             <p className="text-green-200 mt-1 text-sm">Procurement Inspector · Food Corporation of India</p>
             <div className="flex flex-wrap gap-3 mt-3 text-xs text-green-200">
               <span className="flex items-center gap-1.5">
@@ -114,21 +153,30 @@ export const OfficerProfile = () => {
           {editing ? (
             <div className="space-y-4">
               {[
-                { label: 'Full Name', value: officer.name, name: 'name' },
-                { label: 'Badge Number', value: officer.badgeNo, name: 'badge' },
-                { label: 'Centre Assigned', value: officer.centreAssigned, name: 'centre' },
-                { label: 'Shift', value: officer.shift, name: 'shift' },
+                { label: 'Full Name', value: form.name, key: 'name' },
+                { label: 'Badge Number', value: form.badgeNo, key: 'badgeNo' },
+                { label: 'Centre Assigned', value: form.centreAssigned, key: 'centreAssigned' },
+                { label: 'Shift', value: form.shift, key: 'shift' },
               ].map((field) => (
-                <div key={field.name} className="space-y-1.5">
+                <div key={field.key} className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-700 uppercase tracking-wide">{field.label}</label>
                   <input
                     type="text"
-                    defaultValue={field.value}
-                    className="w-full bg-white border border-slate-300 rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-colors"
+                    value={field.value}
+                    onChange={(e) => {
+                      setForm(prev => ({ ...prev, [field.key]: e.target.value }));
+                      if (field.key === 'name' && nameError) setNameError('');
+                    }}
+                    className={`w-full bg-white border ${
+                      field.key === 'name' && nameError ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-300 focus:ring-green-600 focus:border-green-600'
+                    } rounded-lg px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 transition-colors`}
                   />
+                  {field.key === 'name' && nameError && (
+                    <p className="text-[11px] text-rose-600 font-medium">{nameError}</p>
+                  )}
                 </div>
               ))}
-              <PrimaryButton className="w-full justify-center" onClick={() => setEditing(false)}>
+              <PrimaryButton className="w-full justify-center" onClick={handleSave}>
                 Save Changes
               </PrimaryButton>
             </div>
@@ -185,7 +233,7 @@ export const OfficerProfile = () => {
               <div className="text-right">
                 <p className="text-3xl font-bold text-amber-700">A+</p>
                 <div className="flex gap-0.5 mt-1 justify-end">
-                  {[1,2,3,4,5].map((s) => (
+                  {[1, 2, 3, 4, 5].map((s) => (
                     <span key={s} className={`text-sm ${s <= 4 ? 'text-amber-500' : 'text-amber-300'}`}>★</span>
                   ))}
                 </div>

@@ -3,14 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/common/PageHeader';
 import PrimaryButton from '../../components/buttons/PrimaryButton';
 import SecondaryButton from '../../components/buttons/SecondaryButton';
-import { Printer, Download, Home, CheckCircle2, IndianRupee, Building } from 'lucide-react';
+import { Printer, Download, Home, CheckCircle2, Building } from 'lucide-react';
+import officerStorage from '../../utils/officerStorage';
+import ProcurementWorkflowProgress from '../../components/officer/ProcurementWorkflowProgress';
 import receiptsData from '../../data/receipts.json';
 
 export const Receipt = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const receipt = receiptsData.find((r) => r.receiptId === id) || receiptsData[0];
+  const receipt = officerStorage.getReceiptById(id) || receiptsData.find((r) => r.receiptId === id) || receiptsData[0];
 
   const ReceiptRow = ({ label, value, mono = false }) => (
     <div className="flex items-start justify-between py-2 border-b border-dashed border-slate-200 last:border-0 gap-4">
@@ -20,19 +22,83 @@ export const Receipt = () => {
   );
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <PageHeader
-        title="Digital Procurement Receipt"
-        subtitle="Official MSP grain procurement voucher"
-        action={
-          <SecondaryButton icon={Home} onClick={() => navigate('/officer/dashboard')}>
-            Dashboard
-          </SecondaryButton>
-        }
-      />
+    <div className="space-y-5 max-w-2xl mx-auto select-auto">
+      {/* Officer Receipt Print Styles */}
+      <style>{`
+        @media print {
+          @page {
+            size: auto;
+            margin: 10mm 12mm;
+          }
 
-      {/* Success Banner */}
-      <div className="flex items-center gap-3 bg-green-800 text-white rounded-xl px-5 py-4">
+          /* Reset all screen-height and overflow constraints */
+          html,
+          body,
+          #root,
+          .officer-portal-root,
+          main {
+            height: auto !important;
+            min-height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
+            position: static !important;
+            display: block !important;
+            background: #ffffff !important;
+            padding: 0 !important;
+            margin: 0 !important;
+          }
+
+          /* Hide header, sidebar, notifications, and all bottom buttons */
+          header,
+          aside,
+          nav,
+          .no-print {
+            display: none !important;
+          }
+
+          /* Full Receipt Card Print Display */
+          #receipt-print {
+            display: block !important;
+            position: static !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+            border: 2px solid #065f46 !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+            page-break-inside: avoid !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          #receipt-print * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+        }
+      `}</style>
+
+      {/* Top Header & Navigation (Hidden in Print) */}
+      <div className="no-print">
+        <PageHeader
+          title="Digital Procurement Receipt"
+          subtitle="Official MSP grain procurement voucher"
+          action={
+            <SecondaryButton icon={Home} onClick={() => navigate('/officer/dashboard')}>
+              Dashboard
+            </SecondaryButton>
+          }
+        />
+      </div>
+
+      {/* Procurement Workflow Step 6 - Receipt (Hidden in Print) */}
+      <div className="no-print">
+        <ProcurementWorkflowProgress currentStep={6} />
+      </div>
+
+      {/* Success Banner (Hidden in Print) */}
+      <div className="no-print flex items-center gap-3 bg-green-800 text-white rounded-xl px-5 py-4 shadow-xs">
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
           <CheckCircle2 className="w-5 h-5" />
         </div>
@@ -42,7 +108,7 @@ export const Receipt = () => {
         </div>
       </div>
 
-      {/* Receipt Card */}
+      {/* Receipt Card (Printed Output) */}
       <div id="receipt-print" className="bg-white border-2 border-green-800 rounded-2xl overflow-hidden shadow-lg">
         {/* Receipt Header */}
         <div className="bg-green-800 text-white px-6 py-5 text-center">
@@ -89,7 +155,7 @@ export const Receipt = () => {
             </div>
           </div>
 
-          {/* Weight */}
+          {/* Weighment Details */}
           <div>
             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Weighment Details</p>
             <div className="space-y-0">
@@ -139,8 +205,8 @@ export const Receipt = () => {
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Actions (Visible on webpage, Hidden in Print) */}
+      <div className="no-print flex flex-col sm:flex-row gap-3">
         <PrimaryButton icon={Printer} onClick={() => window.print()} className="flex-1 justify-center">
           Print Voucher
         </PrimaryButton>
@@ -152,14 +218,18 @@ export const Receipt = () => {
         </SecondaryButton>
       </div>
 
-      <button
-        onClick={() => navigate('/officer/dashboard')}
-        className="w-full text-center text-sm text-green-700 hover:text-green-900 font-semibold py-2 transition-colors"
-      >
-        ← Return to Dashboard
-      </button>
+      <div className="no-print">
+        <button
+          onClick={() => navigate('/officer/dashboard')}
+          className="w-full text-center text-sm text-green-700 hover:text-green-900 font-semibold py-2 transition-colors"
+        >
+          ← Return to Dashboard
+        </button>
+      </div>
     </div>
   );
 };
 
 export default Receipt;
+
+

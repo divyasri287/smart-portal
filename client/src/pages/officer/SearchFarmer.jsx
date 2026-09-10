@@ -4,20 +4,23 @@ import PageHeader from '../../components/common/PageHeader';
 import Card from '../../components/cards/Card';
 import SearchBox from '../../components/inputs/SearchBox';
 import { ArrowRight, User, MapPin, Wheat, Phone } from 'lucide-react';
-import farmersData from '../../data/farmers.json';
+import officerStorage from '../../utils/officerStorage';
+import farmersDataFallback from '../../data/farmers.json';
 
 export const SearchFarmer = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filtered = farmersData.filter((f) => {
+  const farmers = officerStorage.getFarmers() || farmersDataFallback;
+
+  const filtered = farmers.filter((f) => {
     const q = searchTerm.toLowerCase();
     return (
       f.name.toLowerCase().includes(q) ||
       f.id.toLowerCase().includes(q) ||
       f.aadhaar.includes(q) ||
       f.mobile.includes(q) ||
-      f.cropType.toLowerCase().includes(q)
+      (f.cropType && f.cropType.toLowerCase().includes(q))
     );
   });
 
@@ -44,8 +47,9 @@ export const SearchFarmer = () => {
         </p>
       )}
 
-      {/* Table View */}
-      <Card>
+      {/* Table View (Desktop & Tablet) */}
+      <div className="hidden md:block">
+        <Card>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-sm">
             <thead>
@@ -116,12 +120,13 @@ export const SearchFarmer = () => {
           </table>
         </div>
         <div className="mt-3 text-[11px] text-slate-400">
-          {filtered.length} of {farmersData.length} registered farmers
+          {filtered.length} of {farmers.length} registered farmers
         </div>
       </Card>
+      </div>
 
-      {/* Grid Card View (Mobile-friendly alternative) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Grid Card View (Mobile only, touch-friendly) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:hidden">
         {filtered.map((farmer, idx) => (
           <div
             key={idx}

@@ -4,7 +4,8 @@ import PageHeader from '../../components/common/PageHeader';
 import Card from '../../components/cards/Card';
 import SearchBox from '../../components/inputs/SearchBox';
 import { QrCode, Eye, Wheat, Clock, Users } from 'lucide-react';
-import queueData from '../../data/queue.json';
+import officerStorage from '../../utils/officerStorage';
+import initialQueue from '../../data/queue.json';
 
 const statusConfig = {
   'In Queue': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
@@ -29,13 +30,14 @@ export const Queue = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
 
+  const queueData = officerStorage.getQueue() || initialQueue;
   const statuses = ['All', 'In Queue', 'Pending Verification', 'Quality Verified', 'Weight Logged', 'Receipt Generated'];
 
   const filtered = queueData.filter((item) => {
     const matchSearch =
-      item.farmerName.toLowerCase().includes(search.toLowerCase()) ||
-      item.tokenNo.toLowerCase().includes(search.toLowerCase()) ||
-      item.vehicleNo.toLowerCase().includes(search.toLowerCase());
+      (item.farmerName && item.farmerName.toLowerCase().includes(search.toLowerCase())) ||
+      (item.tokenNo && item.tokenNo.toLowerCase().includes(search.toLowerCase())) ||
+      (item.vehicleNo && item.vehicleNo.toLowerCase().includes(search.toLowerCase()));
     const matchFilter = filter === 'All' || item.status === filter;
     return matchSearch && matchFilter;
   });
@@ -94,11 +96,10 @@ export const Queue = () => {
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`text-xs font-semibold px-3 py-2 rounded-lg border transition-colors whitespace-nowrap ${
-                filter === s
+              className={`text-xs font-semibold px-3 py-2 rounded-lg border transition-colors whitespace-nowrap ${filter === s
                   ? 'bg-green-800 text-white border-green-800'
                   : 'bg-white text-slate-600 border-slate-200 hover:border-green-700 hover:text-green-800'
-              }`}
+                }`}
             >
               {s}
             </button>
