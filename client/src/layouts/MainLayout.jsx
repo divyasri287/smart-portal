@@ -7,16 +7,22 @@ import ToastContainer from '../components/notifications/ToastContainer';
 
 export const MainLayout = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-      <Navbar onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
-      <div className="flex-1 flex max-w-7xl w-full mx-auto">
+      <Navbar
+        onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+        onToggleDesktopSidebar={() => setDesktopSidebarOpen((prev) => !prev)}
+        isDesktopSidebarOpen={desktopSidebarOpen}
+      />
+      <div className="flex-1 flex w-full">
         <SidebarLayout
           isOpenMobile={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
+          isDesktopSidebarOpen={desktopSidebarOpen}
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 min-w-0">
+        <main className={`flex-1 p-4 sm:p-6 lg:p-8 min-w-0 ${desktopSidebarOpen ? 'md:ml-72' : 'md:ml-0'}`}>
           <Outlet />
         </main>
       </div>

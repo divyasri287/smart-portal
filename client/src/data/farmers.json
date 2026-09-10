@@ -1,35 +1,35 @@
 [
   {
     "id": "FRM-1001",
-    "name": "Ramesh Singh",
+    "name": "M. Karthik",
     "aadhaar": "XXXX-XXXX-8912",
     "mobile": "+91 98765 43210",
     "cropType": "Paddy (Grade A)",
     "acreage": 12.5,
-    "district": "Ludhiana",
-    "state": "Punjab",
-    "bankAccount": "SBIN0001234 - xxxx5678"
+    "district": "Salem",
+    "state": "Tamil Nadu",
+    "bankAccount": "TNSB0001234 - xxxx5678"
   },
   {
     "id": "FRM-1002",
-    "name": "Sukhwinder Kaur",
+    "name": "S. Kavitha",
     "aadhaar": "XXXX-XXXX-4421",
     "mobile": "+91 98123 45678",
     "cropType": "Wheat",
     "acreage": 8.0,
-    "district": "Patiala",
-    "state": "Punjab",
-    "bankAccount": "HDFC0004321 - xxxx9012"
+    "district": "Namakkal",
+    "state": "Tamil Nadu",
+    "bankAccount": "TNSB0004321 - xxxx9012"
   },
   {
     "id": "FRM-1003",
-    "name": "Gurpreet Sharma",
+    "name": "R. Mahendran",
     "aadhaar": "XXXX-XXXX-9901",
     "mobile": "+91 97654 32109",
     "cropType": "Mustard",
     "acreage": 15.0,
-    "district": "Ambala",
-    "state": "Haryana",
-    "bankAccount": "PUNB0008899 - xxxx3456"
+    "district": "Erode",
+    "state": "Tamil Nadu",
+    "bankAccount": "SBI0008899 - xxxx3456"
   }
 ]

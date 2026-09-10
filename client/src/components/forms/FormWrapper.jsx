@@ -1,15 +1,15 @@
 import React from 'react';
 
-export const FormWrapper = ({ children, title, subtitle, onSubmit }) => {
+const FormWrapper = ({ title, subtitle, children, className = '', onSubmit, ...props }) => {
   return (
-    <form onSubmit={onSubmit} className="bg-white border border-slate-200 rounded-lg p-6 shadow-xs max-w-2xl mx-auto space-y-6">
+    <form onSubmit={onSubmit} className={['rounded-2xl border border-slate-200 bg-white p-5 shadow-sm', className].join(' ')} {...props}>
       {(title || subtitle) && (
-        <div className="border-b border-slate-200 pb-3">
-          {title && <h3 className="font-bold text-slate-900 text-lg">{title}</h3>}
-          {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
+        <div className="mb-4">
+          {title && <h3 className="text-lg font-semibold text-slate-900">{title}</h3>}
+          {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
         </div>
       )}
-      <div className="space-y-4">{children}</div>
+      {children}
     </form>
   );
 };

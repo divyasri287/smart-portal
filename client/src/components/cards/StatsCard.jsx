@@ -1,26 +1,64 @@
 import React from 'react';
 
-export const StatsCard = ({ title, value, subtitle, icon: Icon, color = 'emerald' }) => {
-  const colorMap = {
-    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    amber: 'bg-amber-50 text-amber-700 border-amber-200',
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  };
+const colorMap = {
+  emerald: {
+    bg: 'bg-emerald-50',
+    icon: 'bg-emerald-100 text-emerald-700',
+    text: 'text-emerald-700',
+  },
+  amber: {
+    bg: 'bg-amber-50',
+    icon: 'bg-amber-100 text-amber-700',
+    text: 'text-amber-700',
+  },
+  blue: {
+    bg: 'bg-blue-50',
+    icon: 'bg-blue-100 text-blue-700',
+    text: 'text-blue-700',
+  },
+  indigo: {
+    bg: 'bg-indigo-50',
+    icon: 'bg-indigo-100 text-indigo-700',
+    text: 'text-indigo-700',
+  },
+  violet: {
+    bg: 'bg-violet-50',
+    icon: 'bg-violet-100 text-violet-700',
+    text: 'text-violet-700',
+  },
+  rose: {
+    bg: 'bg-rose-50',
+    icon: 'bg-rose-100 text-rose-700',
+    text: 'text-rose-700',
+  },
+};
+
+const StatsCard = ({ title, value, subtitle, icon: Icon, color = 'emerald', onClick }) => {
+  const palette = colorMap[color] || colorMap.emerald;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-5 flex items-center justify-between shadow-xs">
-      <div>
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{title}</p>
-        <p className="text-2xl font-bold text-slate-900 mt-1">{value}</p>
-        {subtitle && <p className="text-xs text-slate-500 mt-1">{subtitle}</p>}
-      </div>
-      {Icon && (
-        <div className={`p-3 rounded-lg border ${colorMap[color] || colorMap.emerald}`}>
-          <Icon className="w-6 h-6" />
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        'w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-left transition hover:-translate-y-0.5 hover:shadow-md',
+        palette.bg,
+        onClick ? 'cursor-pointer' : 'cursor-default'
+      ].join(' ')}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">{title}</p>
+          <p className="mt-3 text-2xl font-bold text-slate-900">{value}</p>
+          <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
         </div>
-      )}
-    </div>
+        {Icon && (
+          <div className={['flex h-11 w-11 items-center justify-center rounded-xl', palette.icon].join(' ')}>
+            <Icon className="h-5 w-5" />
+          </div>
+        )}
+      </div>
+    </button>
   );
 };
 

@@ -5,18 +5,18 @@ import Timeline from '../../components/timeline/Timeline';
 
 export const ProcurementStatus = () => {
   const steps = [
-    { title: 'Slot Booked & Gate Token Generated', description: 'Token #TKN-A901 generated for Ludhiana Centre 4', completed: true, timestamp: '2026-08-30 09:00 AM' },
-    { title: 'Gate Entry & ANPR Vehicle Logging', description: 'Vehicle PB-10-CZ-4419 scanned at Mandi Gate 2', completed: true, timestamp: '2026-08-30 09:45 AM' },
-    { title: 'Moisture & Quality Inspection', description: 'Moisture recorded: 12.4% (Grade A Approved)', completed: true, timestamp: '2026-08-30 10:15 AM' },
-    { title: 'Weighbridge Gross & Tare Weighment', description: 'Net Quantity Logged: 140.5 Quintals', current: true },
-    { title: 'Digital Receipt & Payment Disbursement', description: 'Awaiting weighment sign-off by Procurement Officer', completed: false },
+    { title: 'Booking Confirmed', description: 'Farmers slot booked successfully for Salem procurement centre', completed: true, timestamp: '2026-09-02 08:30 AM' },
+    { title: 'Token Generated', description: 'Gate token TKN-A901 generated and sent to the farmer', completed: true, timestamp: '2026-09-02 08:45 AM' },
+    { title: 'Status Updated at Gate', description: 'Vehicle entry recorded and queue status updated', completed: true, timestamp: '2026-09-02 09:10 AM' },
+    { title: 'Payment Receiving', description: 'DBT process underway and payment is being credited', completed: true, timestamp: '2026-09-02 12:30 PM' },
+    { title: 'Payment Completed', description: 'MSP payment received in the linked bank account', completed: true, timestamp: '2026-09-02 01:00 PM' },
   ];
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Real-Time Procurement Status" subtitle="Live tracking of your grain batch inside the procurement centre" />
+      <PageHeader title="Real-Time Procurement Status" subtitle="Booking, token, live status and payment flow are updated in sequence" />
 
-      <Card title="Batch Process Tracker (#TKN-A901)" subtitle="Token assigned to Bay 3">
+      <Card title="Batch Process Tracker (#TKN-A901)" subtitle="Status: Payment Received | Salem Main Procurement Centre">
         <Timeline steps={steps} />
       </Card>
     </div>

@@ -7,8 +7,10 @@ import ManagerSidebar from './ManagerSidebar';
 import AdminSidebar from './AdminSidebar';
 import { X } from 'lucide-react';
 
-export const SidebarLayout = ({ isOpenMobile, onCloseMobile }) => {
+export const SidebarLayout = ({ isOpenMobile, onCloseMobile, isDesktopSidebarOpen = true }) => {
   const { role } = useAuth();
+
+  const isFarmerRole = role === ROLES.FARMER;
 
   const renderRoleSidebar = () => {
     switch (role) {
@@ -28,8 +30,18 @@ export const SidebarLayout = ({ isOpenMobile, onCloseMobile }) => {
   return (
     <>
       {/* Desktop Persistent Sidebar */}
-      <aside className="hidden md:block w-64 bg-white border-r border-slate-200 shrink-0 min-h-[calc(100vh-4rem)]">
-        {renderRoleSidebar()}
+      <aside className={`hidden md:block bg-white border-r border-slate-200 shrink-0 transition-all duration-200 ${
+        isFarmerRole
+          ? isDesktopSidebarOpen
+            ? 'fixed left-0 top-16 h-[calc(100vh-4rem)] w-60 overflow-hidden'
+            : 'fixed left-0 top-16 h-[calc(100vh-4rem)] w-0 overflow-hidden border-r-0'
+          : isDesktopSidebarOpen
+            ? 'relative w-60 min-h-[calc(100vh-4rem)]'
+            : 'relative w-0 min-h-[calc(100vh-4rem)] overflow-hidden border-r-0'
+      }`}>
+        <div className={`h-full ${isDesktopSidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+          {renderRoleSidebar()}
+        </div>
       </aside>
 
       {/* Mobile Drawer Sidebar */}

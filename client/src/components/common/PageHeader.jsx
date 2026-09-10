@@ -1,13 +1,13 @@
 import React from 'react';
 
-export const PageHeader = ({ title, subtitle, action }) => {
+const PageHeader = ({ title, subtitle, action, className = '' }) => {
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 pb-4 mb-6 gap-4">
+    <div className={['flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className].join(' ')}>
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{title}</h1>
-        {subtitle && <p className="text-sm text-slate-600 mt-1">{subtitle}</p>}
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
       </div>
-      {action && <div className="flex items-center gap-2">{action}</div>}
+      {action && <div>{action}</div>}
     </div>
   );
 };

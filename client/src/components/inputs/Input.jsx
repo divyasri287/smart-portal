@@ -1,24 +1,36 @@
 import React from 'react';
 
-export const Input = ({ label, type = 'text', placeholder, value, onChange, name, error, required = false }) => {
+const Input = ({
+  label,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  required = false,
+  className = '',
+  ...props
+}) => {
   return (
-    <div className="w-full flex flex-col gap-1.5">
+    <label className="block w-full text-sm font-medium text-slate-700">
       {label && (
-        <label htmlFor={name} className="text-xs font-semibold text-slate-700 tracking-wide uppercase">
-          {label} {required && <span className="text-rose-600">*</span>}
-        </label>
+        <span className="mb-1.5 block">
+          {label}
+          {required && <span className="ml-1 text-red-500">*</span>}
+        </span>
       )}
       <input
-        id={name}
-        name={name}
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`w-full bg-white border ${error ? 'border-rose-500' : 'border-slate-300'} text-slate-900 rounded-md px-3.5 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-600 focus:border-emerald-600 transition-colors`}
+        required={required}
+        className={[
+          'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100',
+          className,
+        ].join(' ')}
+        {...props}
       />
-      {error && <span className="text-xs text-rose-600 mt-0.5">{error}</span>}
-    </div>
+    </label>
   );
 };
 

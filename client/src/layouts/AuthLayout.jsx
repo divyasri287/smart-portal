@@ -1,27 +1,21 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Footer from '../components/footer/Footer';
-import RoleSwitcher from '../components/navbar/RoleSwitcher';
-import { ShieldCheck } from 'lucide-react';
+import ToastContainer from '../components/notifications/ToastContainer';
 
 export const AuthLayout = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100">
-      <header className="bg-emerald-800 text-white py-4 px-6 flex items-center justify-between shadow-xs">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-emerald-300" />
-          <span className="font-bold text-lg">Smart Procurement Portal</span>
-        </div>
-        <RoleSwitcher />
-      </header>
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans select-none cursor-default">
+      {/* Top Green Accent Bar matching original design */}
+      <div className="h-2.5 bg-emerald-800 w-full shrink-0 shadow-xs" />
 
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-lg border border-slate-200 p-6 shadow-md">
+      {/* Main Content Area - perfectly centered */}
+      <main className="flex-1 flex items-center justify-center p-4 sm:p-6 md:p-8">
+        <div className="w-full max-w-4xl mx-auto">
           <Outlet />
         </div>
       </main>
 
-      <Footer />
+      <ToastContainer />
     </div>
   );
 };
