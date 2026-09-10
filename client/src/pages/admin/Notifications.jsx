@@ -4,33 +4,29 @@ import {
   Plus,
   Search,
   CheckCircle2,
-  Calendar,
   AlertTriangle,
   FileText,
-  Clock,
+  Calendar,
   Trash2,
   Eye,
   X,
   Send,
-  CloudRain,
-  Building2,
   Megaphone,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
 export const AdminNotifications = () => {
   const [notifications, setNotifications] = useState(() => adminStorage.getNotifications());
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [search, setSearch] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewNotif, setViewNotif] = useState(null);
   const [notice, setNotice] = useState(null);
 
   const [form, setForm] = useState({
     title: '',
-    category: 'Government Circular',
+    category: 'Government Announcement',
     targetAudience: 'All Centres',
-    priority: 'Normal',
     message: '',
   });
 
@@ -47,14 +43,18 @@ export const AdminNotifications = () => {
     e.preventDefault();
     if (!form.title || !form.message) return;
 
-    adminStorage.addNotification(form);
+    adminStorage.addNotification({
+      title: form.title,
+      category: form.category,
+      targetAudience: form.targetAudience,
+      message: form.message,
+    });
     setNotifications(adminStorage.getNotifications());
     showToast(`Notification "${form.title}" published successfully.`);
     setForm({
       title: '',
-      category: 'Government Circular',
+      category: 'Government Announcement',
       targetAudience: 'All Centres',
-      priority: 'Normal',
       message: '',
     });
     setShowCreateModal(false);
@@ -67,74 +67,58 @@ export const AdminNotifications = () => {
     if (viewNotif && viewNotif.id === id) setViewNotif(null);
   };
 
+  // EXACT CATEGORIES SPECIFIED BY USER
   const categories = [
     'All',
+    'Government Announcement',
     'Holiday Notice',
     'Centre Closed',
-    'Heavy Rain Alert',
-    'Government Circular',
+    'Procurement Schedule Update',
   ];
 
   const filtered = notifications.filter((n) => {
     const matchesSearch =
-      n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.message.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === 'All' || n.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+      n.title.toLowerCase().includes(search.toLowerCase()) ||
+      n.message.toLowerCase().includes(search.toLowerCase());
+    const matchesCat = categoryFilter === 'All' || n.category === categoryFilter;
+    return matchesSearch && matchesCat;
   });
 
-  const getCategoryIcon = (category) => {
-    switch (category) {
-      case 'Heavy Rain Alert':
-        return <CloudRain className="w-4 h-4 text-blue-600" />;
-      case 'Centre Closed':
-        return <AlertTriangle className="w-4 h-4 text-rose-600" />;
-      case 'Holiday Notice':
-        return <Calendar className="w-4 h-4 text-amber-600" />;
-      case 'Government Circular':
-      default:
-        return <FileText className="w-4 h-4 text-emerald-600" />;
-    }
-  };
-
-  const getCategoryBadgeClass = (category) => {
-    switch (category) {
-      case 'Heavy Rain Alert':
-        return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Centre Closed':
-        return 'bg-rose-50 text-rose-700 border-rose-200';
+  const getCategoryBadge = (cat) => {
+    switch (cat) {
       case 'Holiday Notice':
         return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'Government Circular':
+      case 'Centre Closed':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'Procurement Schedule Update':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Government Announcement':
       default:
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        return 'bg-green-50 text-green-800 border-green-200';
     }
   };
 
   return (
-    <div className="space-y-6 select-none cursor-default font-sans pb-8">
+    <div className="space-y-6 pb-12 font-sans select-none">
       {/* ── HEADER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-              <Megaphone className="w-3.5 h-3.5 text-emerald-700" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
+              <Megaphone className="w-3.5 h-3.5" />
               Administrative Broadcasts
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Notification & Circular Dispatch
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Notifications</h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Issue weather alerts, holiday notices, centre closure orders, and official ministry circulars
+            Publish announcements, holiday notices, and centre schedule updates
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-800 hover:bg-green-700 text-white font-semibold text-xs transition-colors shadow-xs cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Create Notification</span>
@@ -143,61 +127,25 @@ export const AdminNotifications = () => {
 
       {/* ── TOAST NOTICE ── */}
       {notice && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-3 text-xs font-bold shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-green-50 border border-green-300 text-green-900 flex items-center gap-3 text-xs font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-green-700 shrink-0" />
           <span>{notice}</span>
         </div>
       )}
 
-      {/* ── TOP STATS (MAX 4 CARDS) ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
-          <p className="text-xs font-semibold text-slate-500">Total Broadcasts</p>
-          <p className="text-2xl font-extrabold text-slate-900 font-mono mt-1">
-            {notifications.length}
-          </p>
-          <p className="text-[11px] text-slate-400 mt-1">Active Notices</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
-          <p className="text-xs font-semibold text-blue-700">Weather & Rain Alerts</p>
-          <p className="text-2xl font-extrabold text-blue-800 font-mono mt-1">
-            {notifications.filter((n) => n.category === 'Heavy Rain Alert').length}
-          </p>
-          <p className="text-[11px] text-blue-600 mt-1">Yard Safety Advisories</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
-          <p className="text-xs font-semibold text-amber-700">Holiday Notices</p>
-          <p className="text-2xl font-extrabold text-amber-800 font-mono mt-1">
-            {notifications.filter((n) => n.category === 'Holiday Notice').length}
-          </p>
-          <p className="text-[11px] text-amber-600 mt-1">Operational Adjustments</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
-          <p className="text-xs font-semibold text-emerald-700">Govt Circulars</p>
-          <p className="text-2xl font-extrabold text-emerald-800 font-mono mt-1">
-            {notifications.filter((n) => n.category === 'Government Circular').length}
-          </p>
-          <p className="text-[11px] text-emerald-600 mt-1">Ministry Standard Policies</p>
-        </div>
-      </div>
-
       {/* ── CATEGORY PILLS & SEARCH ── */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="bg-white rounded-xl border border-slate-200 p-3.5 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-1.5 flex-wrap self-start md:self-auto">
           {categories.map((cat) => (
             <button
               key={cat}
               type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={
-                'px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ' +
-                (selectedCategory === cat
-                  ? 'bg-emerald-800 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200')
-              }
+              onClick={() => setCategoryFilter(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                categoryFilter === cat
+                  ? 'bg-green-800 text-white font-bold shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
             >
               {cat}
             </button>
@@ -208,71 +156,60 @@ export const AdminNotifications = () => {
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search announcements..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-600 bg-slate-50/50"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search notifications..."
+            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:border-green-700 bg-slate-50/60"
           />
         </div>
       </div>
 
-      {/* ── NOTIFICATIONS LIST ── */}
+      {/* ── NOTIFICATIONS LIST (VIEW NOTIFICATIONS) ── */}
       <div className="space-y-3">
         {filtered.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400 text-xs">
-            No announcements found in this category.
+          <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-xs">
+            No notifications found in this category.
           </div>
         ) : (
           filtered.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs hover:border-emerald-600/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs hover:border-green-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
-              <div className="space-y-1.5 flex-1">
+              <div className="space-y-1 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span
-                    className={
-                      'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold border ' +
-                      getCategoryBadgeClass(item.category)
-                    }
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${getCategoryBadge(
+                      item.category
+                    )}`}
                   >
-                    {getCategoryIcon(item.category)}
-                    <span>{item.category}</span>
+                    {item.category}
                   </span>
-
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    Target: <strong className="text-slate-700">{item.targetAudience}</strong>
+                  <span className="text-[11px] text-slate-500">
+                    Audience: <strong className="text-slate-700">{item.targetAudience}</strong>
                   </span>
-
                   <span className="text-slate-300">·</span>
-
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    {item.date}
-                  </span>
+                  <span className="text-[11px] font-mono text-slate-400">{item.date}</span>
                 </div>
 
-                <h3 className="font-bold text-sm text-slate-900 leading-snug">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                  {item.message}
-                </p>
+                <h3 className="font-bold text-sm text-slate-900">{item.title}</h3>
+                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{item.message}</p>
               </div>
 
               <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
                 <button
                   type="button"
                   onClick={() => setViewNotif(item)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-300 transition-colors cursor-pointer inline-flex items-center gap-1"
                 >
                   <Eye className="w-3.5 h-3.5 text-slate-500" />
-                  <span>View Notice</span>
+                  <span>View</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDelete(item.id)}
                   className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
-                  title="Delete announcement"
+                  title="Delete notice"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -285,16 +222,13 @@ export const AdminNotifications = () => {
       {/* ── CREATE NOTIFICATION MODAL ── */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-slate-200 bg-emerald-900 text-white">
-              <div className="flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-emerald-300" />
-                <h3 className="font-bold text-base">Create Official Notification</h3>
-              </div>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 bg-green-800 text-white">
+              <h3 className="font-bold text-base">Create Notification</h3>
               <button
                 type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
+                className="p-1 rounded-lg hover:bg-green-700 text-green-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -302,16 +236,14 @@ export const AdminNotifications = () => {
 
             <form onSubmit={handleCreate} className="p-5 space-y-3.5 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Announcement Title
-                </label>
+                <label className="block font-bold text-slate-700 mb-1">Title</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Heavy Rain Alert: Tarpaulin Coverage Mandated"
+                  placeholder="e.g. Centre Closed Notice: Heavy Rain Expected"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-green-700"
                 />
               </div>
 
@@ -321,54 +253,39 @@ export const AdminNotifications = () => {
                   <select
                     value={form.category}
                     onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-green-700 bg-white"
                   >
+                    <option value="Government Announcement">Government Announcement</option>
                     <option value="Holiday Notice">Holiday Notice</option>
                     <option value="Centre Closed">Centre Closed</option>
-                    <option value="Heavy Rain Alert">Heavy Rain Alert</option>
-                    <option value="Government Circular">Government Circular</option>
+                    <option value="Procurement Schedule Update">Procurement Schedule Update</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Target Audience</label>
+                  <label className="block font-bold text-slate-700 mb-1">Audience</label>
                   <select
                     value={form.targetAudience}
                     onChange={(e) => setForm({ ...form, targetAudience: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-green-700 bg-white"
                   >
                     <option value="All Centres">All Centres</option>
                     <option value="All Officers">All Officers</option>
                     <option value="All Managers">All Managers</option>
-                    <option value="Farmers & Public">Farmers & Public</option>
+                    <option value="Farmers &amp; Public">Farmers &amp; Public</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Priority Level</label>
-                <select
-                  value={form.priority}
-                  onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 bg-white"
-                >
-                  <option value="Normal">Normal</option>
-                  <option value="High">High</option>
-                  <option value="Critical">Critical</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  Notification Message & Instructions
-                </label>
+                <label className="block font-bold text-slate-700 mb-1">Message Content</label>
                 <textarea
                   rows="4"
                   required
-                  placeholder="Enter complete circular text or operational guidelines..."
+                  placeholder="Enter notice details or instructions..."
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-green-700"
                 />
               </div>
 
@@ -382,10 +299,10 @@ export const AdminNotifications = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold cursor-pointer inline-flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-lg bg-green-800 hover:bg-green-700 text-white font-bold cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <Send className="w-3.5 h-3.5" />
-                  <span>Publish Announcement</span>
+                  <span>Publish</span>
                 </button>
               </div>
             </form>
@@ -396,58 +313,29 @@ export const AdminNotifications = () => {
       {/* ── VIEW NOTIFICATION MODAL ── */}
       {viewNotif && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-emerald-900 text-white">
-              <div className="flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-emerald-300" />
-                <h3 className="font-bold text-base">{viewNotif.category}</h3>
-              </div>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden">
+            <div className="flex items-center justify-between p-4 bg-green-800 text-white">
+              <h3 className="font-bold text-base">{viewNotif.category}</h3>
               <button
                 type="button"
                 onClick={() => setViewNotif(null)}
-                className="p-1 rounded-lg hover:bg-emerald-800 text-emerald-200 hover:text-white"
+                className="p-1 rounded-lg hover:bg-green-700 text-green-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-5 space-y-4 text-xs">
-              <div>
-                <span
-                  className={
-                    'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold border ' +
-                    getCategoryBadgeClass(viewNotif.category)
-                  }
-                >
-                  {getCategoryIcon(viewNotif.category)}
-                  <span>{viewNotif.category}</span>
-                </span>
-                <h2 className="text-base font-bold text-slate-900 mt-2">
-                  {viewNotif.title}
-                </h2>
-                <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                  Published: {viewNotif.date} · Audience: {viewNotif.targetAudience}
-                </p>
-              </div>
-
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 leading-relaxed text-slate-700 text-xs">
+            <div className="p-5 space-y-3 text-xs">
+              <h2 className="text-base font-bold text-slate-900">{viewNotif.title}</h2>
+              <p className="text-[11px] text-slate-400 font-mono">
+                Date: {viewNotif.date} · Audience: {viewNotif.targetAudience}
+              </p>
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 leading-relaxed">
                 {viewNotif.message}
-              </div>
-
-              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-900 text-[11px]">
-                <strong>Dispatch Status: </strong> Delivered to all registered SMS and portal dashboards across verified user accounts.
               </div>
             </div>
 
-            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => handleDelete(viewNotif.id)}
-                className="px-3 py-1.5 text-xs text-rose-700 hover:bg-rose-50 border border-rose-200 rounded-lg font-bold cursor-pointer inline-flex items-center gap-1"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete</span>
-              </button>
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
               <button
                 type="button"
                 onClick={() => setViewNotif(null)}

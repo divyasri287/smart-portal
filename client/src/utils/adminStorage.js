@@ -890,9 +890,13 @@ export const adminStorage = {
   // Dashboard Stats
   getDashboardStats: () => {
     const centres = adminStorage.getCentres();
+    const officers = adminStorage.getOfficers();
+    const managers = adminStorage.getManagers();
     const pStats = adminStorage.getPaymentStats();
     const openCentres = centres.filter((c) => c.status === 'Open').length;
     const closedCentres = centres.filter((c) => c.status === 'Closed').length;
+    const activeOfficers = officers.filter((o) => o.status === 'Active').length;
+    const activeManagers = managers.filter((m) => m.status === 'Active').length;
 
     return {
       totalCentres: centres.length,
@@ -900,8 +904,11 @@ export const adminStorage = {
       centresClosed: closedCentres,
       todayFarmers: 4820,
       todayProcurement: '18,450 MT',
+      totalRegisteredFarmers: '5,820',
       pendingPayments: '₹ ' + pStats.pendingAmount.toLocaleString('en-IN'),
       pendingPaymentCount: pStats.pendingCount,
+      activeOfficers: activeOfficers,
+      activeManagers: activeManagers,
     };
   },
 

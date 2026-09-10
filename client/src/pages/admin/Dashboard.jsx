@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Building2,
-  Users,
-  CreditCard,
   CheckCircle2,
   XCircle,
-  Clock,
   Wheat,
+  Users,
+  CreditCard,
+  ShieldCheck,
+  UserCheck,
+  FileSpreadsheet,
   ArrowRight,
-  CalendarDays,
+  Clock,
+  ChevronRight,
 } from 'lucide-react';
 import adminStorage from '../../utils/adminStorage';
 
@@ -26,105 +29,240 @@ export const AdminDashboard = () => {
       setPStats(adminStorage.getPaymentStats());
     };
     sync();
-    const interval = setInterval(sync, 3000);
+    const interval = setInterval(sync, 2500);
     return () => clearInterval(interval);
   }, []);
 
-  const metricCards = [
-    { title: 'Total Centres', value: stats.totalCentres, sub: 'Procurement Mandis', icon: Building2, iconColor: 'text-emerald-800', iconBg: 'bg-emerald-50 border-emerald-100' },
-    { title: 'Centres Open', value: stats.centresOpen, sub: 'Active and Accepting', icon: CheckCircle2, iconColor: 'text-emerald-700', iconBg: 'bg-emerald-50 border-emerald-100' },
-    { title: 'Centres Closed', value: stats.centresClosed, sub: 'Standby / Off-shift', icon: XCircle, iconColor: 'text-rose-600', iconBg: 'bg-rose-50 border-rose-100' },
-    { title: 'Registered Farmers', value: '5,820', sub: 'Verified Beneficiaries', icon: Users, iconColor: 'text-blue-700', iconBg: 'bg-blue-50 border-blue-100' },
-    { title: "Today's Bookings", value: stats.todayFarmers.toLocaleString('en-IN'), sub: 'Tokens Issued Today', icon: CalendarDays, iconColor: 'text-violet-700', iconBg: 'bg-violet-50 border-violet-100' },
-    { title: "Today's Procurement", value: stats.todayProcurement, sub: 'Weighbridge Total', icon: Wheat, iconColor: 'text-amber-700', iconBg: 'bg-amber-50 border-amber-100' },
-    { title: 'Pending Payments', value: '₹ ' + pStats.pendingAmount.toLocaleString('en-IN'), sub: pStats.pendingCount + ' Farmers Awaiting DBT', icon: Clock, iconColor: 'text-amber-700', iconBg: 'bg-amber-50 border-amber-100' },
+  // EXACT 8 STATS REQUESTED BY USER
+  const statCards = [
+    {
+      title: 'Total Centres',
+      value: stats.totalCentres,
+      subtitle: 'Registered Mandis',
+      icon: Building2,
+      color: 'green',
+    },
+    {
+      title: 'Centres Open',
+      value: stats.centresOpen,
+      subtitle: 'Accepting Grain',
+      icon: CheckCircle2,
+      color: 'emerald',
+    },
+    {
+      title: 'Centres Closed',
+      value: stats.centresClosed,
+      subtitle: 'Maintenance / Standby',
+      icon: XCircle,
+      color: 'rose',
+    },
+    {
+      title: "Today's Procurement",
+      value: stats.todayProcurement || '18,450 MT',
+      subtitle: 'Weighbridge Recorded',
+      icon: Wheat,
+      color: 'amber',
+    },
+    {
+      title: 'Total Registered Farmers',
+      value: '5,820',
+      subtitle: 'Aadhaar Verified',
+      icon: Users,
+      color: 'blue',
+    },
+    {
+      title: 'Pending Payments',
+      value: '₹ ' + pStats.pendingAmount.toLocaleString('en-IN'),
+      subtitle: `${pStats.pendingCount} Farmers Awaiting`,
+      icon: CreditCard,
+      color: 'amber',
+    },
+    {
+      title: 'Active Officers',
+      value: stats.activeOfficers || 8,
+      subtitle: 'On Yard Duty',
+      icon: ShieldCheck,
+      color: 'indigo',
+    },
+    {
+      title: 'Active Managers',
+      value: stats.activeManagers || 8,
+      subtitle: 'Depot Chiefs',
+      icon: UserCheck,
+      color: 'violet',
+    },
   ];
 
+  // EXACT 4 QUICK ACTIONS REQUESTED BY USER
   const quickActions = [
-    { label: 'View Centres', desc: 'Monitor and control procurement centres', link: '/admin/centre-monitoring', icon: Building2 },
-    { label: 'Manage Users', desc: 'Administer officers and centre managers', link: '/admin/users', icon: Users },
-    { label: 'View Payments', desc: 'Process pending DBT payments to farmers', link: '/admin/payments', icon: CreditCard },
+    {
+      title: 'View Centres',
+      desc: 'Monitor status and open/close mandi gates',
+      icon: Building2,
+      link: '/admin/centre-monitoring',
+    },
+    {
+      title: 'Manage Users',
+      desc: 'Administer officers and centre managers',
+      icon: Users,
+      link: '/admin/users',
+    },
+    {
+      title: 'View Payments',
+      desc: 'Approve and clear pending DBT transactions',
+      icon: CreditCard,
+      link: '/admin/payments',
+    },
+    {
+      title: 'Reports',
+      desc: 'Download certified daily and monthly audit files',
+      icon: FileSpreadsheet,
+      link: '/admin/reports',
+    },
   ];
+
+  // EXACT 3 RECENT ACTIVITIES REQUESTED BY USER
+  const recentActivities = [
+    {
+      id: 1,
+      title: 'Recently Approved Payment',
+      desc: 'Payment of ₹ 1,11,360 to S. Arumugam (Token TKN-TN-8843) marked as completed.',
+      time: '12 mins ago',
+      icon: CreditCard,
+      iconColor: 'text-green-700 bg-green-50 border-green-200',
+    },
+    {
+      id: 2,
+      title: 'Newly Added Officer',
+      desc: 'Officer INS-TN-5501 (P. Selvakumar) assigned to Salem Main Procurement Centre.',
+      time: '45 mins ago',
+      icon: ShieldCheck,
+      iconColor: 'text-blue-700 bg-blue-50 border-blue-200',
+    },
+    {
+      id: 3,
+      title: 'Recently Opened Centre',
+      desc: 'Thanjavur Direct Purchase Centre marked Open for farmer slot intake.',
+      time: '2 hours ago',
+      icon: Building2,
+      iconColor: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+    },
+  ];
+
+  const iconStyles = {
+    green: 'bg-green-50 text-green-800 border-green-200',
+    emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    rose: 'bg-rose-50 text-rose-700 border-rose-200',
+    amber: 'bg-amber-50 text-amber-700 border-amber-200',
+    blue: 'bg-blue-50 text-blue-700 border-blue-200',
+    indigo: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    violet: 'bg-purple-50 text-purple-700 border-purple-200',
+  };
 
   return (
-    <div className="space-y-6 pb-10 font-sans select-none">
-      {/* Header */}
-      <div className="pb-4 border-b border-slate-200">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-            Government Admin Portal
-          </span>
+    <div className="space-y-6 pb-12 font-sans select-none">
+      {/* ── WORKSTATION HEADER (MATCHES OFFICER MODULE) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-green-100 text-green-800 border border-green-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-green-700" />
+              Government Admin Directorate
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Procurement Overview Dashboard
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            {profile.department} · {profile.adminName}
+          </p>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-0.5">
-          {profile.adminName} · {profile.department}
-        </p>
       </div>
 
-      {/* 4 top metric cards */}
+      {/* ── 8 CLEAN SUMMARY STATS CARDS ── */}
       <div>
-        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Today's Overview</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {metricCards.slice(0, 4).map((c) => {
+        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+          Today's Procurement Summary
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {statCards.map((c) => {
             const Icon = c.icon;
             return (
-              <div key={c.title} className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
+              <div
+                key={c.title}
+                className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs hover:shadow-sm transition-shadow"
+              >
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-slate-500">{c.title}</p>
-                  <div className={'p-1.5 rounded-lg border ' + c.iconBg}>
-                    <Icon className={'w-3.5 h-3.5 ' + c.iconColor} />
+                  <p className="text-xs font-semibold text-slate-500 truncate">{c.title}</p>
+                  <div className={`p-1.5 rounded-lg border ${iconStyles[c.color] || iconStyles.green}`}>
+                    <Icon className="w-4 h-4" />
                   </div>
                 </div>
-                <p className="text-2xl font-extrabold text-slate-900 font-mono">{c.value}</p>
-                <p className="text-[11px] text-slate-400 mt-1">{c.sub}</p>
-              </div>
-            );
-          })}
-        </div>
-        {/* 3 bottom metric cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-          {metricCards.slice(4).map((c) => {
-            const Icon = c.icon;
-            return (
-              <div key={c.title} className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-slate-500">{c.title}</p>
-                  <div className={'p-1.5 rounded-lg border ' + c.iconBg}>
-                    <Icon className={'w-3.5 h-3.5 ' + c.iconColor} />
-                  </div>
-                </div>
-                <p className="text-2xl font-extrabold text-slate-900 font-mono leading-tight">{c.value}</p>
-                <p className="text-[11px] text-slate-400 mt-1">{c.sub}</p>
+                <p className="text-2xl font-extrabold text-slate-900 font-mono tracking-tight">
+                  {c.value}
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1 truncate">{c.subtitle}</p>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* ── 4 QUICK ACTIONS ── */}
       <div>
-        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {quickActions.map((action) => {
             const Icon = action.icon;
             return (
-              <div
-                key={action.label}
-                className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs hover:border-emerald-700 hover:shadow-xs transition-all group"
+              <button
+                key={action.title}
+                type="button"
+                onClick={() => navigate(action.link)}
+                className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs hover:border-green-700 hover:shadow-xs transition-all text-left flex flex-col justify-between group cursor-pointer"
               >
-                <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-800 mb-3 group-hover:bg-emerald-800 group-hover:text-white transition-colors">
+                <div>
+                  <div className="w-9 h-9 rounded-lg bg-green-50 border border-green-100 flex items-center justify-center text-green-800 mb-3 group-hover:bg-green-800 group-hover:text-white transition-colors">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900">{action.title}</h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">{action.desc}</p>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-green-800 group-hover:text-green-900">
+                  <span>Open {action.title}</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── RECENT ACTIVITIES (3 EXACT ITEMS) ── */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div className="p-4 border-b border-slate-100">
+          <h2 className="font-bold text-sm text-slate-900">Recent Operational Activities</h2>
+          <p className="text-xs text-slate-500 mt-0.5">Live record of portal actions and status updates</p>
+        </div>
+        <div className="divide-y divide-slate-100">
+          {recentActivities.map((act) => {
+            const Icon = act.icon;
+            return (
+              <div key={act.id} className="p-4 flex items-start gap-3 hover:bg-slate-50/60 transition-colors">
+                <div className={`p-2 rounded-lg border shrink-0 mt-0.5 ${act.iconColor}`}>
                   <Icon className="w-4 h-4" />
                 </div>
-                <h3 className="font-bold text-sm text-slate-900">{action.label}</h3>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">{action.desc}</p>
-                <button
-                  type="button"
-                  onClick={() => navigate(action.link)}
-                  className="mt-4 w-full inline-flex items-center justify-center gap-2 py-2 px-4 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs transition-colors cursor-pointer"
-                >
-                  <span>{action.label}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-bold text-slate-900">{act.title}</p>
+                    <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1 shrink-0">
+                      <Clock className="w-3 h-3" /> {act.time}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">{act.desc}</p>
+                </div>
               </div>
             );
           })}
