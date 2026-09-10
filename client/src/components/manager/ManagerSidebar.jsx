@@ -10,7 +10,6 @@ import {
   Bell,
   User,
   LogOut,
-  Building2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import managerStorage from '../../utils/managerStorage';
@@ -23,11 +22,12 @@ export const ManagerSidebar = ({ onCloseMobile }) => {
   const [centreStatus, setCentreStatus] = useState(() => managerStorage.getCentreStatus());
 
   useEffect(() => {
-    // Listen for status/profile changes
-    const interval = setInterval(() => {
+    const syncState = () => {
       setProfile(managerStorage.getProfile());
       setCentreStatus(managerStorage.getCentreStatus());
-    }, 1000);
+    };
+    syncState();
+    const interval = setInterval(syncState, 1500);
     return () => clearInterval(interval);
   }, []);
 
@@ -48,54 +48,39 @@ export const ManagerSidebar = ({ onCloseMobile }) => {
     if (onCloseMobile) onCloseMobile();
   };
 
-  return (
-    <aside className="flex flex-col h-full bg-white border-r border-slate-200 select-none">
-      {/* Centre Manager Mandi Header */}
-      <div className="p-4 border-b border-emerald-900 bg-emerald-800 text-white shrink-0">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 bg-white/10 rounded-lg">
-            <Building2 className="w-5 h-5 text-emerald-200" />
-          </div>
-          <div>
-            <span className="text-[10px] font-bold tracking-wider uppercase text-emerald-200 block">
-              Govt Procurement Centre
-            </span>
-            <span className="text-xs font-black tracking-tight text-white block">
-              Centre Manager Portal
-            </span>
-          </div>
-        </div>
+  const initials = profile.name
+    ? profile.name.split(' ').map((n) => n[0]).slice(0, 2).join('')
+    : 'AK';
 
-        {/* Centre Name & Real-Time Status */}
-        <div className="bg-emerald-900/90 border border-emerald-700/60 rounded-xl p-2.5 mt-2">
-          <p className="text-xs font-bold text-white truncate leading-tight">
-            {profile.centreName || 'Salem Main Procurement Centre #402'}
-          </p>
-          <div className="flex items-center justify-between mt-1.5 pt-1.5 border-t border-emerald-800 text-[11px]">
-            <span className="text-emerald-200 font-medium truncate">
+  return (
+    <div className="flex flex-col h-full bg-white select-none">
+      {/* ── TOP STATUS PILL CARD (MATCHES OFFICER SIDEBAR DESIGN EXACTLY) ── */}
+      <div className="p-3 border-b border-slate-100 bg-slate-50/70 shrink-0">
+        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-emerald-50 border border-emerald-200/70">
+          <div className="w-8 h-8 rounded-full bg-emerald-800 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold text-slate-900 truncate leading-tight">
               {profile.name || 'Anil Kumar'}
-            </span>
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                centreStatus === 'Open'
-                  ? 'bg-emerald-500 text-emerald-950'
-                  : 'bg-rose-500 text-white'
-              }`}
-            >
+            </p>
+            <p className="text-[10px] text-emerald-700 font-medium truncate flex items-center gap-1.5 mt-0.5">
               <span
-                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                  centreStatus === 'Open' ? 'bg-emerald-950 animate-pulse' : 'bg-white'
+                className={`w-1.5 h-1.5 rounded-full ${
+                  centreStatus === 'Open' ? 'bg-emerald-600 animate-pulse' : 'bg-rose-500'
                 }`}
               />
-              {centreStatus}
-            </span>
+              <span>{profile.centreCode || 'CEN-TN-SLM-402'}</span>
+              <span>·</span>
+              <span className="font-bold">{centreStatus === 'Open' ? 'Centre Open' : 'Closed'}</span>
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Navigation Links - Exactly the 8 required menu items */}
-      <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
-        <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+      {/* ── NAVIGATION LINKS (EXACTLY 8 ITEMS) ── */}
+      <nav className="flex-1 p-2.5 space-y-1 overflow-y-auto">
+        <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
           Operations Menu
         </div>
         {links.map((link) => {
@@ -106,10 +91,10 @@ export const ManagerSidebar = ({ onCloseMobile }) => {
               to={link.to}
               onClick={onCloseMobile}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
                   isActive
                     ? 'bg-emerald-800 text-white shadow-xs font-bold'
-                    : 'text-slate-700 hover:bg-emerald-50 hover:text-emerald-900'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-emerald-900'
                 }`
               }
             >
@@ -120,18 +105,28 @@ export const ManagerSidebar = ({ onCloseMobile }) => {
         })}
       </nav>
 
-      {/* Logout Button (Bottom of Sidebar) */}
-      <div className="p-3 border-t border-slate-200 bg-slate-50 shrink-0">
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 shadow-2xs transition-all cursor-pointer"
-        >
-          <LogOut className="w-4 h-4 text-rose-600 shrink-0" />
-          <span>Logout</span>
-        </button>
+      {/* ── BOTTOM AREA: LOGOUT BUTTON & CENTRE FOOTER (MATCHES OFFICER EXACTLY) ── */}
+      <div className="mt-auto border-t border-slate-200 bg-slate-50/60 shrink-0">
+        <div className="p-2.5">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2.5 px-3 py-2 rounded-lg text-xs font-bold text-rose-600 bg-white hover:bg-rose-50 hover:text-rose-700 border border-rose-200 shadow-2xs transition-all cursor-pointer"
+          >
+            <LogOut className="w-4 h-4 text-rose-600 shrink-0" />
+            <span>Logout</span>
+          </button>
+        </div>
+
+        {/* Footer Info */}
+        <div className="px-3 pb-3 pt-0.5 text-[10px] text-slate-400 text-center">
+          <p className="font-semibold text-slate-600 truncate">
+            {profile.centreName || 'Salem Main Procurement Centre #402'}
+          </p>
+          <p className="text-[9px] mt-0.5 text-slate-400">Season Kharif 2026</p>
+        </div>
       </div>
-    </aside>
+    </div>
   );
 };
 

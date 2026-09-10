@@ -71,55 +71,75 @@ export const QueueMonitoring = () => {
         </button>
       </div>
 
-      {/* ── 4 SUMMARY STATUS CARDS ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── 4 SUMMARY STATUS CARDS (MATCHES OFFICER THEME) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Current Token */}
-        <div className="bg-white rounded-2xl border-2 border-emerald-600 p-4.5 shadow-xs">
-          <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
-            Current Token
-          </span>
-          <p className="text-2xl sm:text-3xl font-black text-emerald-900 font-mono mt-1">
-            {currentToken}
-          </p>
-          <p className="text-[11px] text-slate-500 mt-1">At weighment bay</p>
+        <div className="bg-white rounded-xl p-3.5 border border-emerald-300 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">
+              Current Token
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <Ticket className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5">
+            <p className="text-2xl font-bold text-emerald-900 font-mono leading-none">{currentToken}</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-1">At weighment bay</p>
+          </div>
         </div>
 
         {/* Next Token */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4.5 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Next Token
-          </span>
-          <p className="text-2xl sm:text-3xl font-black text-slate-800 font-mono mt-1">
-            {nextToken}
-          </p>
-          <p className="text-[11px] text-slate-500 mt-1">Next in line</p>
+        <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+              Next Token
+            </span>
+            <div className="p-1.5 rounded-lg bg-slate-50 text-slate-700 border border-slate-200">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5">
+            <p className="text-2xl font-bold text-slate-900 font-mono leading-none">{nextToken}</p>
+            <p className="text-[11px] text-slate-500 font-medium mt-1">Next in line</p>
+          </div>
         </div>
 
         {/* Waiting Farmers */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4.5 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Waiting Farmers
-          </span>
-          <p className="text-2xl sm:text-3xl font-black text-amber-700 mt-1">
-            {waitingCount}
-          </p>
-          <p className="text-[11px] text-slate-500 mt-1">In staging area</p>
+        <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+              Waiting Farmers
+            </span>
+            <div className="p-1.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+              <Clock className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5">
+            <p className="text-2xl font-bold text-amber-700 font-mono leading-none">{waitingCount}</p>
+            <p className="text-[11px] text-amber-700 font-medium mt-1">In staging area</p>
+          </div>
         </div>
 
         {/* Completed Farmers */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-4.5 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Completed Farmers
-          </span>
-          <p className="text-2xl sm:text-3xl font-black text-emerald-700 mt-1">
-            {completedCount}
-          </p>
-          <p className="text-[11px] text-slate-500 mt-1">Receipt issued</p>
+        <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:border-slate-300 transition-colors">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
+              Completed Farmers
+            </span>
+            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-2.5">
+            <p className="text-2xl font-bold text-emerald-700 font-mono leading-none">{completedCount}</p>
+            <p className="text-[11px] text-emerald-700 font-medium mt-1">Receipt issued</p>
+          </div>
         </div>
       </div>
 
       {/* ── QUEUE TABLE (EXACT 5 COLUMNS + ACTION BUTTON) ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/70">
           <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Today's Queue List ({queue.length} Total Tokens)

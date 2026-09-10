@@ -104,7 +104,7 @@ export const SlotManagement = () => {
       </div>
 
       {/* ── SLOTS TABLE (EXACT 5 REQUIRED COLUMNS + ACTION BUTTONS) ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/70">
           <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Today's Scheduled Slots ({slots.length} Slots)

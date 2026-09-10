@@ -80,7 +80,7 @@ export const OfficerManagement = () => {
       </div>
 
       {/* ── OFFICER LIST TABLE ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
           <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
             Centre Officers List ({officers.length} Registered Officers)

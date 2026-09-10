@@ -105,7 +105,7 @@ export const Profile = () => {
       </div>
 
       {/* ── PROFILE DETAILS CARD (EXACTLY THE 4 REQUIRED FIELDS) ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         {/* Profile Header Banner */}
         <div className="p-6 bg-emerald-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-emerald-900">
           <div className="flex items-center gap-4">

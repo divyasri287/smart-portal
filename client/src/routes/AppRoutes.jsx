@@ -6,6 +6,7 @@ import { ROLES } from '../constants/roles';
 // Layouts
 import MainLayout from '../layouts/MainLayout';
 import OfficerLayout from '../layouts/OfficerLayout';
+import ManagerLayout from '../layouts/ManagerLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import Loader from '../components/loader/Loader';
 
@@ -50,16 +51,18 @@ export const AppRoutes = () => {
           </Route>
         </Route>
 
+        {/* ── Dedicated Centre Manager Module Layout (Matching Officer Module Theme & Layout) ── */}
+        <Route element={<ProtectedRoute allowedRoles={[ROLES.MANAGER]} />}>
+          <Route element={<ManagerLayout />}>
+            <Route path="/manager/*" element={<ManagerRoutes />} />
+          </Route>
+        </Route>
+
         {/* ── Other Protected Modules Application Shell ── */}
         <Route element={<MainLayout />}>
           {/* Farmer Module Routes */}
           <Route element={<ProtectedRoute allowedRoles={[ROLES.FARMER]} />}>
             <Route path="/farmer/*" element={<FarmerRoutes />} />
-          </Route>
-
-          {/* Centre Manager Module Routes */}
-          <Route element={<ProtectedRoute allowedRoles={[ROLES.MANAGER]} />}>
-            <Route path="/manager/*" element={<ManagerRoutes />} />
           </Route>
 
           {/* Government Admin Module Routes */}

@@ -70,10 +70,10 @@ export const ManagerReports = () => {
         {/* Card 1: Today's Report */}
         <div
           onClick={() => setActiveTab('today')}
-          className={`p-5 rounded-2xl border-2 transition-all cursor-pointer bg-white shadow-xs ${
+          className={`p-4 rounded-xl border-2 transition-all cursor-pointer bg-white shadow-2xs ${
             activeTab === 'today'
               ? 'border-emerald-700 ring-2 ring-emerald-100'
-              : 'border-slate-200 hover:border-slate-300'
+              : 'border-slate-200/80 hover:border-slate-300'
           }`}
         >
           <div className="flex items-center justify-between mb-3">
@@ -133,10 +133,10 @@ export const ManagerReports = () => {
         {/* Card 2: Weekly Report */}
         <div
           onClick={() => setActiveTab('weekly')}
-          className={`p-5 rounded-2xl border-2 transition-all cursor-pointer bg-white shadow-xs ${
+          className={`p-4 rounded-xl border-2 transition-all cursor-pointer bg-white shadow-2xs ${
             activeTab === 'weekly'
               ? 'border-emerald-700 ring-2 ring-emerald-100'
-              : 'border-slate-200 hover:border-slate-300'
+              : 'border-slate-200/80 hover:border-slate-300'
           }`}
         >
           <div className="flex items-center justify-between mb-3">
@@ -196,10 +196,10 @@ export const ManagerReports = () => {
         {/* Card 3: Monthly Report */}
         <div
           onClick={() => setActiveTab('monthly')}
-          className={`p-5 rounded-2xl border-2 transition-all cursor-pointer bg-white shadow-xs ${
+          className={`p-4 rounded-xl border-2 transition-all cursor-pointer bg-white shadow-2xs ${
             activeTab === 'monthly'
               ? 'border-emerald-700 ring-2 ring-emerald-100'
-              : 'border-slate-200 hover:border-slate-300'
+              : 'border-slate-200/80 hover:border-slate-300'
           }`}
         >
           <div className="flex items-center justify-between mb-3">
@@ -258,7 +258,7 @@ export const ManagerReports = () => {
       </div>
 
       {/* ── SELECTED REPORT BREAKDOWN TABLE (NO CHARTS / NO GRAPHS) ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-slate-200/80 shadow-2xs overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold text-slate-900">{currentReport.title}</h2>
