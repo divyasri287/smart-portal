@@ -1,69 +1,74 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
+import { ROLES } from '../constants/roles';
 
 // Layouts
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
-import FarmerLayout from '../layouts/FarmerLayout';
-import OfficerLayout from '../layouts/OfficerLayout';
-import ManagerLayout from '../layouts/ManagerLayout';
-import AdminLayout from '../layouts/AdminLayout';
+import Loader from '../components/loader/Loader';
 
 // Module Routes
-import FarmerRoutes from './FarmerRoutes';
-import OfficerRoutes from './OfficerRoutes';
-import ManagerRoutes from './ManagerRoutes';
-import AdminRoutes from './AdminRoutes';
+const FarmerRoutes = lazy(() => import('./FarmerRoutes'));
+const OfficerRoutes = lazy(() => import('./OfficerRoutes'));
+const ManagerRoutes = lazy(() => import('./ManagerRoutes'));
+const AdminRoutes = lazy(() => import('./AdminRoutes'));
 
-// Pages
-import LandingPage from '../pages/landing/LandingPage';
-import Login from '../pages/auth/Login';
-import Register from '../pages/auth/Register';
-import ForgotPassword from '../pages/auth/ForgotPassword';
+// Auth Pages
+const Login = lazy(() => import('../pages/auth/Login'));
+const Register = lazy(() => import('../pages/auth/Register'));
+const ForgotPassword = lazy(() => import('../pages/auth/ForgotPassword'));
 
-// Shared Pages
-import Loading from '../pages/shared/Loading';
-import Error from '../pages/shared/Error';
-import Success from '../pages/shared/Success';
-import NotFound from '../pages/shared/NotFound';
-import ComingSoon from '../pages/shared/ComingSoon';
+// Shared Status Screens
+const Loading = lazy(() => import('../pages/shared/Loading'));
+const Error = lazy(() => import('../pages/shared/Error'));
+const Success = lazy(() => import('../pages/shared/Success'));
+const NotFound = lazy(() => import('../pages/shared/NotFound'));
 
 export const AppRoutes = () => {
   return (
-    <Routes>
-      {/* Auth Routes */}
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-      </Route>
+    <Suspense fallback={<Loader />}>
+      <Routes>
+        {/* Public Authentication Entry Points */}
+        <Route element={<AuthLayout />}>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+        </Route>
 
-      {/* Main Application Shell with Shared Navbar, Sidebar, and Footer */}
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<LandingPage />} />
+        {/* Protected Dashboard Application Shell */}
+        <Route element={<MainLayout />}>
+          {/* Farmer Module Routes */}
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.FARMER]} />}>
+            <Route path="/farmer/*" element={<FarmerRoutes />} />
+          </Route>
 
-        {/* Farmer Module Routes (Member 1) */}
-        <Route path="/farmer/*" element={<FarmerRoutes />} />
+          {/* Procurement Officer Module Routes */}
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.OFFICER]} />}>
+            <Route path="/officer/*" element={<OfficerRoutes />} />
+          </Route>
 
-        {/* Officer Module Routes (Member 2) */}
-        <Route path="/officer/*" element={<OfficerRoutes />} />
+          {/* Centre Manager Module Routes */}
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.MANAGER]} />}>
+            <Route path="/manager/*" element={<ManagerRoutes />} />
+          </Route>
 
-        {/* Manager Module Routes (Member 3) */}
-        <Route path="/manager/*" element={<ManagerRoutes />} />
+          {/* Government Admin Module Routes */}
+          <Route element={<ProtectedRoute allowedRoles={[ROLES.ADMIN]} />}>
+            <Route path="/admin/*" element={<AdminRoutes />} />
+          </Route>
 
-        {/* Admin Module Routes (Member 4) */}
-        <Route path="/admin/*" element={<AdminRoutes />} />
+          {/* Shared Status Screens */}
+          <Route path="/loading" element={<Loading />} />
+          <Route path="/error" element={<Error />} />
+          <Route path="/success" element={<Success />} />
+        </Route>
 
-        {/* Shared Pages */}
-        <Route path="/loading" element={<Loading />} />
-        <Route path="/error" element={<Error />} />
-        <Route path="/success" element={<Success />} />
-        <Route path="/coming-soon" element={<ComingSoon />} />
-      </Route>
-
-      {/* 404 Fallback */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Unknown routes redirect directly to Login Page */}
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 

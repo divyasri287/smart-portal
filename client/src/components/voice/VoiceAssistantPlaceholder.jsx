@@ -15,10 +15,10 @@ export const VoiceAssistantPlaceholder = () => {
         </button>
         <div>
           <h4 className="text-xs font-bold text-emerald-950 uppercase tracking-wide">
-            Kisan Bol-Assist (Voice Navigation)
+            Farmer Bol-Assist (Voice Navigation)
           </h4>
           <p className="text-xs text-emerald-800">
-            {listening ? 'Listening... Speak in Hindi or Punjabi' : 'Tap microphone for Multilingual Voice Help'}
+            {listening ? 'Listening... Speak in Tamil or English' : 'Tap microphone for Multilingual Voice Help'}
           </p>
         </div>
       </div>

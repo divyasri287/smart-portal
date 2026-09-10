@@ -1,0 +1,17 @@
+{
+  "name": "smart-procurement-portal-root",
+  "version": "1.0.0",
+  "description": "Smart Procurement Portal (SIH 2026) Frontend Workspace",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "preview": "npm --prefix client run preview",
+    "client": "npm --prefix client run dev"
+  },
+  "keywords": [
+    "smart-procurement",
+    "sih2026"
+  ],
+  "author": "SIH Team",
+  "license": "MIT"
+}

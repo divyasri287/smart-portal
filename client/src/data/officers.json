@@ -1,17 +1,17 @@
 [
   {
     "id": "OFF-401",
-    "name": "Inspector Vikram Sharma",
-    "badgeNo": "INS-PB-8891",
-    "centreAssigned": "Ludhiana Mandi Centre 4",
+    "name": "Inspector V. Balasubramaniam",
+    "badgeNo": "INS-TN-8891",
+    "centreAssigned": "Salem Main Procurement Centre",
     "shift": "Morning (08:00 AM - 04:00 PM)",
     "status": "Active"
   },
   {
     "id": "OFF-402",
-    "name": "Inspector Priya Verma",
-    "badgeNo": "INS-PB-8892",
-    "centreAssigned": "Patiala Grain Mandi",
+    "name": "Inspector P. Kavitha",
+    "badgeNo": "INS-TN-8892",
+    "centreAssigned": "Namakkal Grain Mandi",
     "shift": "Evening (04:00 PM - 12:00 AM)",
     "status": "Active"
   }

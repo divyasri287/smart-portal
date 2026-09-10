@@ -26,7 +26,7 @@ export const Help = () => {
         </div>
 
         <div>
-          <Card title="Toll-Free Kisan Helpline">
+          <Card title="Toll-Free Farmer Helpline">
             <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-md border border-emerald-200">
               <PhoneCall className="w-6 h-6 text-emerald-700" />
               <div>

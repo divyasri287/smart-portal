@@ -1,22 +1,11 @@
-import React from 'react';
+const Footer = () => {
+  const year = new Date().getFullYear();
 
-export const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800 text-xs py-6 px-4 mt-auto">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-        <div>
-          <p className="font-semibold text-white">Smart Procurement Portal © 2026</p>
-          <p className="text-slate-400 text-[11px] mt-0.5">
-            Designed & Developed for Smart India Hackathon | Govt of India MSP Initiative
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-4 text-slate-400">
-          <a href="#privacy" className="hover:underline">Privacy Policy</a>
-          <span>•</span>
-          <a href="#terms" className="hover:underline">Terms of Service</a>
-          <span>•</span>
-          <a href="#helpdesk" className="hover:underline">Toll Free: 1800-1100-2026</a>
-        </div>
+    <footer className="border-t border-slate-200 bg-white/80 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-sm text-slate-600 sm:flex-row sm:px-6 lg:px-8">
+        <p>© {year} Smart Procurement Portal</p>
+        <p>Farmers • Procurement • Transparency</p>
       </div>
     </footer>
   );
